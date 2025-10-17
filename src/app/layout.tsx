@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 
 import "./globals.css"
+import { TRPCReactProvider } from "@/trpc/client";
 
 // 👉 Import Manrope font
 const manrope = Manrope({
@@ -23,7 +24,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${manrope.variable} font-sans antialiased`}>
-        {children}
+        <TRPCReactProvider>
+          {children}
+        </TRPCReactProvider>
       </body>
     </html>
   );
