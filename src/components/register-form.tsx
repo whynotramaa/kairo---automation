@@ -18,38 +18,52 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import Link from "next/link";
-
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { Loader, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-const loginSchema = z.object({
+const RegisterSchema = z.object({
     email: z.email("Please enter a valid email address"),
     password: z.string().min(6, "Password of atleast length 6 is required"),
-})
+    confirmPassword: z.string(),
+}).superRefine((data, ctx) => {
+    if (data.password !== data.confirmPassword) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Passwords don't match",
+            path: ["confirmPassword"]
+        });
+        ctx.addIssue({
+            code: "custom",
+            message: "Passwords don't match",
+            path: ["password"]
+        });
+    }
+});
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type RegisterFormValues = z.infer<typeof RegisterSchema>;
 
-export function LoginForm() {
+export function RegisterForm() {
     const router = useRouter()
 
-    const form = useForm<LoginFormValues>({
-        resolver: zodResolver(loginSchema),
+    const form = useForm<RegisterFormValues>({
+        resolver: zodResolver(RegisterSchema),
         defaultValues: {
             email: "",
             password: "",
+            confirmPassword: "",
         }
     })
 
-    const onSubmit = async (values: LoginFormValues) => {
+    const onSubmit = async (values: RegisterFormValues) => {
         console.log(values)
-
-        await authClient.signIn.email(
+        await authClient.signUp.email(
             {
-                // name: values.email,
+                name: values.email,
                 email: values.email,
                 password: values.password,
-                callbackURL: "/"
+                callbackURL: '/'
+
             }, {
             onSuccess: () => {
                 router.push("/")
@@ -57,9 +71,7 @@ export function LoginForm() {
             onError: (ctx) => {
                 toast.error(ctx.error.message)
             }
-        }
-        )
-
+        })
     }
 
     const isPending = form.formState.isSubmitting
@@ -69,10 +81,10 @@ export function LoginForm() {
             <Card>
                 <CardHeader className="text-center">
                     <CardTitle>
-                        Welcome Back Buddy !!!
+                        Get Started
                     </CardTitle>
                     <CardDescription>
-                        Please login to continue
+                        Create your account to continue
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -112,15 +124,28 @@ export function LoginForm() {
                                                 <FormMessage />
                                             </FormItem>
                                         )} />
+                                    <FormField control={form.control} name="confirmPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>
+                                                    Confirm your Password
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input type="password" placeholder="******" {...field} />
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )} />
 
                                     <Button type="submit" className="w-full" disabled={isPending}>
-                                        {isPending ? (<Loader className="mr-2 h-4 w-4 animate-spin" />) : ("Login")}
+                                        {isPending ? (<Loader2 className="mr-2 h-4 w-4 animate-spin" />) : ("Create an account")}
+
                                     </Button>
 
                                     <div className="text-center text-sm">
-                                        Don&apos;t have an account?{" "}
-                                        <Link href="/signup" className="underline underline-offset-4">
-                                            Sign Up
+                                        Alredy have an account ? {" "}
+                                        <Link href="/login" className="underline underline-offset-4">
+                                            Log in
                                         </Link>
                                     </div>
 
