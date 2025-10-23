@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { GithubLogo, GoogleLogo } from "@phosphor-icons/react";
 
 import {
     Form,
@@ -91,14 +92,16 @@ export function RegisterForm() {
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <div className="grid gap-6">
-                                <div className="flex flex-col gap-4">
+                                {/* <div className="flex flex-col gap-4">
                                     <Button variant={"outline"} className="w-full" type="button" disabled={isPending}>
+                                        <GithubLogo size={32} />
                                         Continue with GitHub
                                     </Button>
                                     <Button variant={"outline"} className="w-full" type="button" disabled={isPending}>
+                                        <GoogleLogo size={32} />
                                         Continue with Google
                                     </Button>
-                                </div>
+                                </div> */}
                                 <div className="grid gap-6">
                                     <FormField control={form.control} name="email"
                                         render={({ field }) => (

@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { GithubLogo, GoogleLogo } from "@phosphor-icons/react";
+
 
 import {
     Form,
@@ -21,7 +23,7 @@ import Link from "next/link";
 
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { Loader, Loader2 } from "lucide-react";
+import { Loader, Loader2, LogIn } from "lucide-react";
 
 const loginSchema = z.object({
     email: z.email("Please enter a valid email address"),
@@ -81,9 +83,11 @@ export function LoginForm() {
                             <div className="grid gap-6">
                                 <div className="flex flex-col gap-4">
                                     <Button variant={"outline"} className="w-full" type="button" disabled={isPending}>
+                                        <GithubLogo size={32} />
                                         Continue with GitHub
                                     </Button>
                                     <Button variant={"outline"} className="w-full" type="button" disabled={isPending}>
+                                        <GoogleLogo size={32} />
                                         Continue with Google
                                     </Button>
                                 </div>
@@ -114,12 +118,12 @@ export function LoginForm() {
                                         )} />
 
                                     <Button type="submit" className="w-full" disabled={isPending}>
-                                        {isPending ? (<Loader className="mr-2 h-4 w-4 animate-spin" />) : ("Login")}
+                                        {isPending ? (<Loader className="mr-2 h-4 w-4 animate-spin" />) : "Login"}
                                     </Button>
 
                                     <div className="text-center text-sm">
                                         Don&apos;t have an account?{" "}
-                                        <Link href="/signup" className="underline underline-offset-4">
+                                        <Link href="/register" className="underline underline-offset-4">
                                             Sign Up
                                         </Link>
                                     </div>

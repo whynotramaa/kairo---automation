@@ -29,7 +29,7 @@
   --chart-3: oklch(0.6056 0.2189 292.7172);
   --chart-4: oklch(0.7686 0.1647 70.0804);
   --chart-5: oklch(0.6959 0.1491 162.4796);
-  --radius: 0.5rem;
+  --radius: 1rem;
   --sidebar: oklch(0.9911 0 0);
   --sidebar-foreground: oklch(0.5452 0 0);
   --sidebar-primary: oklch(0.8348 0.1302 160.9080);
@@ -99,7 +99,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --font-serif: Instrument Serif, ui-serif, serif;
-  --radius: 0.5rem;
+  --radius: 1rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
@@ -167,7 +167,7 @@
   --card-foreground: oklch(0.9288 0.0126 255.5078);
   --popover: oklch(0.2603 0 0);
   --popover-foreground: oklch(0.7348 0 0);
-  --primary: oklch(0.4365 0.1044 156.7556);
+  --primary: oklch(0.5110 0.0960 186.3910);
   --primary-foreground: oklch(0.9213 0.0135 167.1556);
   --secondary: oklch(0.2603 0 0);
   --secondary-foreground: oklch(0.9851 0 0);
@@ -193,7 +193,7 @@
   --sidebar-border: oklch(0.2809 0 0);
   --sidebar-ring: oklch(0.8003 0.1821 151.7110);
   --destructive-foreground: oklch(0.9368 0.0045 34.3092);
-  --radius: 0.5rem;
+  --radius: 1rem;
   --font-sans: Manrope, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Instrument Serif, ui-serif, serif;
   --font-mono: Geist Mono, ui-monospace, monospace;
