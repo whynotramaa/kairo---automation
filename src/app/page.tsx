@@ -1,32 +1,26 @@
-import { Button } from "@/components/ui/button";
-import prisma from "@/lib/db";
+
+
+import { LogoutButton } from "@/components/logout";
+import { requireAuth } from "@/lib/auth-utils";
 import { caller } from "@/trpc/server";
 
-export default async function Home() {
+const Page = async () => {
 
-  // const users = await prisma.user.findMany();
-
-  const users = await caller.getUsers()
-
-
+  await requireAuth();
+  const data = await caller.getUsers();
 
   return (
-    <div className="min-h-screen min-w-full flex items-center justify-center gap-2" >
-      <Button variant="secondary">
-        Hello World
-        {/* {JSON.stringify(users)} */}
-      </Button>
-
-      {users.map((user) => (
-        <div
-          key={user.id}
-          className="p-4 border rounded-lg flex flex-col items-start"
-        >
-          <p className="text-lg font-semibold">Name: {user.name}</p>
-          <p className="text-sm text-gray-600">Email: {user.email}</p>
-        </div>
-      ))}
-
+    <div className="min-h-screen min-w-screen flex flex-col py-4 items-center justify-center" >
+      <span className="font-semibold">
+        protected server components
+      </span>
+      {/* <div className="flex-1">
+          {JSON.stringify(data)}
+        </div> */}
+      {/* <Button onClick={() => authClient.signOut()}>Logout</Button> done in other because of client and server collision - cannot use hooks and async await in same file */}
+      <LogoutButton />
     </div>
-  );
+  )
 }
+
+export default Page 
