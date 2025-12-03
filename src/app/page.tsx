@@ -1,23 +1,29 @@
-
+"use client"
 
 import { LogoutButton } from "@/components/logout";
-import { requireAuth } from "@/lib/auth-utils";
-import { caller } from "@/trpc/server";
+import { Button } from "@/components/ui/button";
+import { useTRPC } from "@/trpc/client";
 
-const Page = async () => {
 
-  await requireAuth();
-  const data = await caller.getUsers();
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
+const Page = () => {
+  const trpc = useTRPC();
+  const queryClient = useQueryClient();
+  const testAI = useMutation(trpc.testAI.mutationOptions({
+    onSuccess: () => {
+      toast.success("AI Job Queued")
+    }
+  }))
   return (
-    <div className="min-h-screen min-w-screen flex flex-col py-4 items-center justify-center" >
+    <div className="min-h-screen min-w-screen flex flex-col py-4 gap-4 items-center justify-center" >
       <span className="font-semibold">
         protected server components
       </span>
-      {/* <div className="flex-1">
-          {JSON.stringify(data)}
-        </div> */}
-      {/* <Button onClick={() => authClient.signOut()}>Logout</Button> done in other because of client and server collision - cannot use hooks and async await in same file */}
+      <Button disabled={testAI.isPending} onClick={() => testAI.mutate()}>
+        Test AI
+      </Button>
       <LogoutButton />
     </div>
   )
