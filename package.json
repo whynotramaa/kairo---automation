@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "inngest:dev": "inngest-cli dev",
+    "dev:all": "mprocs"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.44",
@@ -14,9 +16,11 @@
     "@hookform/resolvers": "^5.2.2",
     "@phosphor-icons/react": "^2.1.10",
     "@prisma/client": "^6.17.1",
+    "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-label": "^2.1.7",
-    "@radix-ui/react-separator": "^1.1.7",
-    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@sentry/nextjs": "^10.28.0",
     "@tanstack/react-query": "^5.90.5",
     "@trpc/client": "^11.6.0",
@@ -48,6 +52,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.5",
+    "inngest-cli": "^1.14.0",
+    "mprocs": "^0.7.3",
     "prisma": "^6.17.1",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
