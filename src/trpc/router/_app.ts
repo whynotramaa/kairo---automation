@@ -11,16 +11,7 @@ export const appRouter = createTRPCRouter({
         })
 
         return { success: true, message: "Job Queued" }
-    }),
-    getUsers: protectedProcedure
-        .query(({ ctx }) => {
-            console.log({ userId: ctx.auth.user.id })
-            return prisma.user.findMany({
-                where: {
-                    id: ctx.auth.user.id,
-                }
-            });
-        }),
+    })
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;
