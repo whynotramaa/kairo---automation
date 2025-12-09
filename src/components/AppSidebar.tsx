@@ -87,7 +87,7 @@ export const AppSidebar = () => {
             <SidebarFooter>
                 {!hasActiveSubscription && !isLoading && (
                     <SidebarMenuItem>
-                        <SidebarMenuButton tooltip="Upgarde to Pro" className="gap-x-4 cursor-pointer h-10 px-4" onClick={() => authClient.checkout({ slug: "Kairo-Pro" })}>
+                        <SidebarMenuButton tooltip="Upgrade to Pro" className="gap-x-4 cursor-pointer h-10 px-4" onClick={() => authClient.checkout({ slug: "Kairo-Pro" })}>
                             <StarIcon className="h-4 w-4" />
                             <span>Upgrade to Pro</span>
                         </SidebarMenuButton>
@@ -106,7 +106,7 @@ export const AppSidebar = () => {
                                 router.push("/login")
                             },
                             onError: (ctx) => {
-                                toast.error("Failed to log out. Try again pleasae.")
+                                toast.error("Failed to log out. Please Try Again.")
                                 console.error(ctx.error)
                             }
                         }
