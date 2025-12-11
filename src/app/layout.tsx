@@ -5,6 +5,7 @@ import "./globals.css"
 import { TRPCReactProvider } from "@/trpc/client";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -39,7 +40,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TRPCReactProvider>
-            {children}
+            <NuqsAdapter>
+              {children}
+            </NuqsAdapter>
             <Toaster />
           </TRPCReactProvider>
         </ThemeProvider>
