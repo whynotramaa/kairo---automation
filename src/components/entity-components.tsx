@@ -24,6 +24,10 @@ type EntityHeaderProps = {
 export const EntityHeader = ({
     title, description, newBtnLabel, disabled, isCreating, onNew, newBtnHref,
 }: EntityHeaderProps) => {
+    const creatingCursorClassName = isCreating
+        ? "disabled:pointer-events-auto disabled:cursor-loader"
+        : ""
+
     return (
         <div className="flex flex-row items-center justify-between gap-x-4">
             <div className="flex flex-col">
@@ -38,7 +42,7 @@ export const EntityHeader = ({
             </div>
 
             {onNew && !newBtnHref && (
-                <Button className="cursor-pointer" disabled={isCreating || disabled} size="sm" onClick={onNew} >
+                <Button className={`cursor-pointer ${creatingCursorClassName}`} disabled={isCreating || disabled} size="sm" onClick={onNew} >
                     <PlusIcon className="size-4" />
                     {newBtnLabel}
                 </Button>
@@ -191,9 +195,14 @@ interface EmptyViewProps extends StateViewProps {
     onNew?: () => void;
     title?: string
     actionLabel?: string
+    isCreating?: boolean
 }
 
-export const EmptyView = ({ title = "Nothing here yet", actionLabel = "Create", message, onNew }: EmptyViewProps) => {
+export const EmptyView = ({ title = "Nothing here yet", actionLabel = "Create", message, onNew, isCreating }: EmptyViewProps) => {
+    const creatingCursorClassName = isCreating
+        ? "disabled:pointer-events-auto disabled:cursor-loader"
+        : ""
+
     return (
         <Empty>
             <EmptyHeader>
@@ -211,7 +220,7 @@ export const EmptyView = ({ title = "Nothing here yet", actionLabel = "Create", 
             )}
             {!!onNew && (
                 <EmptyContent>
-                    <Button onClick={onNew}>
+                    <Button className={creatingCursorClassName} disabled={isCreating} onClick={onNew}>
                         {actionLabel}
                     </Button>
                 </EmptyContent>
@@ -264,11 +273,12 @@ interface EntityItemProps {
     onRemove?: () => void | Promise<void>
     isRemoving?: boolean;
     className?: string;
+    onMouseEnter?: () => void;
 }
 
 
 export const EntityItem = ({
-    href, title, subtitle, image, actions, onRemove, isRemoving, className
+    href, title, subtitle, image, actions, onRemove, isRemoving, className, onMouseEnter
 }: EntityItemProps) => {
 
     const handleActionMenuPointerDown = (e: React.MouseEvent) => {
@@ -295,6 +305,7 @@ export const EntityItem = ({
         <Link
             href={href}
             prefetch
+            onMouseEnter={onMouseEnter}
             className={cn(
                 "block rounded-2xl focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
                 isRemoving && "pointer-events-none",

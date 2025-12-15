@@ -1,6 +1,7 @@
 
 import { useTRPC } from "@/trpc/client"
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { keepPreviousData, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import { useCallback } from "react"
 import { toast } from "sonner"
 import { useWorkflowsParams } from "./use-workflows-params"
 
@@ -57,6 +58,53 @@ export const useRemoveWorkflow = () => {
         },
         onError: (error) => {
             toast.error(`Failed to create workflow ${error.message}`)
+        }
+    }))
+
+}
+
+export const useSuspenseWorkflow = (id: string) => {
+    const trpc = useTRPC()
+    return useSuspenseQuery(trpc.workflow.getOne.queryOptions({ id }))
+}
+
+// hook to prefetch a single workflow (for hover prefetch)
+export const usePrefetchWorkflow = () => {
+    const queryClient = useQueryClient()
+    const trpc = useTRPC()
+
+    return useCallback((id: string) => {
+        queryClient.prefetchQuery(trpc.workflow.getOne.queryOptions({ id }))
+    }, [queryClient, trpc])
+}
+
+// non-suspense hook to fetch a single workflow (uses cached data)
+export const useWorkflow = (id: string) => {
+    const trpc = useTRPC()
+    return useQuery({
+        ...trpc.workflow.getOne.queryOptions({ id }),
+        placeholderData: keepPreviousData,
+    })
+}
+
+// hook to update workflow name
+
+export const useUpdateWorkflowName = () => {
+    const queryClient = useQueryClient()
+    const trpc = useTRPC()
+
+    return useMutation(trpc.workflow.updateName.mutationOptions({
+        onSuccess: (data) => {
+            toast.success(`Workflow "${data.name}" updated !`)
+            queryClient.invalidateQueries(
+                trpc.workflow.getmany.queryOptions({})
+            )
+            queryClient.invalidateQueries(
+                trpc.workflow.getOne.queryOptions({ id: data.id })
+            )
+        },
+        onError: (error) => {
+            toast.error(`Failed to update workflow ${error.message}`)
         }
     }))
 

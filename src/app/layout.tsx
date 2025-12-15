@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
-import { Manrope, DM_Sans } from "next/font/google";
+import { Manrope } from "next/font/google";
 
 import "./globals.css"
 import { TRPCReactProvider } from "@/trpc/client";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-
-const dmSans = DM_Sans({subsets:['latin'],variable:'--font-sans'});
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -26,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={dmSans.variable}>
+    <html lang="en" suppressHydrationWarning className="font-sans">
       <head>
         <script
           async

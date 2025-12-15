@@ -1,5 +1,6 @@
 "use client"
 
+import type { CSSProperties } from "react"
 import {
   CircleCheckIcon,
   InfoIcon,
@@ -30,8 +31,17 @@ const Toaster = ({ ...props }: ToasterProps) => {
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)",
-        } as React.CSSProperties
+        } as CSSProperties
       }
+      toastOptions={{
+        classNames: {
+          toast: "w-fit max-w-[calc(100vw-2rem)]",
+          title: "font-mono whitespace-nowrap truncate max-w-[60ch]",
+          description: "font-mono whitespace-nowrap truncate max-w-[60ch]",
+          actionButton: "font-mono whitespace-nowrap",
+          cancelButton: "font-mono whitespace-nowrap",
+        },
+      }}
       {...props}
     />
   )

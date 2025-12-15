@@ -1,7 +1,7 @@
 "use client"
 
 import { EmptyView, EntityContainer, EntityHeader, EntityItem, EntityList, EntityPagination, EntitySearch, ErrorView, LoadingView } from "@/components/entity-components";
-import { useCreateWorkflow, useRemoveWorkflow, useWorkflows } from "../hooks/use-workflows"
+import { useCreateWorkflow, usePrefetchWorkflow, useRemoveWorkflow, useWorkflows } from "../hooks/use-workflows"
 import { useUpgradeModal } from "@/hooks/use-upgrade-mobile";
 import { useRouter } from "next/navigation";
 import { useWorkflowsParams } from "../hooks/use-workflows-params";
@@ -152,6 +152,7 @@ export const WorkflowsEmpty = () => {
             {modal}
             <EmptyView
                 onNew={handleCreate}
+                isCreating={createWorflow.isPending}
                 title="No workflows yet"
                 actionLabel="Create workflow"
                 message="Create your first workflow to start automating tasks."
@@ -165,9 +166,15 @@ export const WorkflowsItem = ({
 }: { data: Workflow }) => {
 
     const removeWorkflow = useRemoveWorkflow()
+    const prefetchWorkflow = usePrefetchWorkflow()
+
     const handleRemove = () => {
         removeWorkflow.mutate({ id: data.id })
 
+    }
+
+    const handleMouseEnter = () => {
+        prefetchWorkflow(data.id)
     }
 
     return (
@@ -188,6 +195,7 @@ export const WorkflowsItem = ({
             }
             onRemove={handleRemove}
             isRemoving={removeWorkflow.isPending}
+            onMouseEnter={handleMouseEnter}
         />
     )
 }

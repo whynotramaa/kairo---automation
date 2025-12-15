@@ -1,6 +1,5 @@
 import { UpgradeModal } from "@/components/upgrade-modal"
 import { TRPCClientError } from "@trpc/client"
-import { error } from "console"
 import { useState } from "react"
 
 

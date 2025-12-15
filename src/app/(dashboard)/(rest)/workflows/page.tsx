@@ -12,8 +12,10 @@ type Props = {
 
 const Page = async ({ searchParams }: Props) => {
     const params = await workflowsParamsLoader(searchParams)
+
     await requireAuth();
     await prefetchWorkflows(params);
+
     return (
         <HydrateClient>
             <WorkflowsContainer>
