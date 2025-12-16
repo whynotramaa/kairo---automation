@@ -3,7 +3,7 @@
 import { ErrorView, LoadingView } from "@/components/entity-components"
 import { useWorkflow } from "@/features/workflows/hooks/use-workflows"
 
-import { useState, useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from "react"
 import {
     ReactFlow, applyNodeChanges, applyEdgeChanges, addEdge,
     type Node,
@@ -20,6 +20,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { nodeComponents } from "@/config/node-components";
 import { AddNodeButton } from "./add-node-button";
+import { useTheme } from "next-themes"
 
 export const EditorLoading = () => {
     return <LoadingView message="Loading Editor" />
@@ -33,14 +34,21 @@ export const EditorError = () => {
 export const Editor = ({ workflowId }: { workflowId: string }) => {
 
     const { data: workflow, isLoading, error } = useWorkflow(workflowId)
-    const [colorMode, setColorMode] = useState<ColorMode>('dark');
+    const { resolvedTheme } = useTheme()
 
-    const [nodes, setNodes] = useState<Node[]>(workflow?.nodes);
-    const [edges, setEdges] = useState<Edge[]>(workflow?.edges);
+    const colorMode: ColorMode = useMemo(
+        () => (resolvedTheme === "dark" ? "dark" : "light"),
+        [resolvedTheme],
+    )
 
-    const onChange: ChangeEventHandler<HTMLSelectElement> = (evt) => {
-        setColorMode(evt.target.value as ColorMode);
-    };
+    const [nodes, setNodes] = useState<Node[]>([])
+    const [edges, setEdges] = useState<Edge[]>([])
+
+    useEffect(() => {
+        if (!workflow) return
+        setNodes(workflow.nodes ?? [])
+        setEdges(workflow.edges ?? [])
+    }, [workflow])
 
     const onNodesChange = useCallback(
         (changes: NodeChange[]) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),

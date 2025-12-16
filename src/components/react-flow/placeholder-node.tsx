@@ -16,7 +16,7 @@ export const PlaceholderNode = forwardRef<
   return (
     <BaseNode
       ref={ref}
-      className="bg-card w-auto h-auto border-dashed border-gray-400 p-2 text-center text-gray-400 shadow-none cursor-pointer hover:border-gray-500 hover:bg-gray-50 transition-all"
+      className="bg-card w-auto h-auto border-dashed border-gray-400 p-2 text-center text-gray-400 shadow-none cursor-pointer hover:border-green-500 hover:border-dashed hover:bg-accent hover:animate-pulse transition-all"
       onClick={onClick}
     >
       {children}
