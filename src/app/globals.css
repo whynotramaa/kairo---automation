@@ -6,6 +6,8 @@
 
 @custom-variant dark (&:is(.dark *));
 
+
+
 :root {
   /* Apple-inspired Light Mode - Clean Monochromatic */
   --background: oklch(0.985 0 0);
