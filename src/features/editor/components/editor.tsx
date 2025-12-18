@@ -21,6 +21,8 @@ import '@xyflow/react/dist/style.css';
 import { nodeComponents } from "@/config/node-components";
 import { AddNodeButton } from "./add-node-button";
 import { useTheme } from "next-themes"
+import { useSetAtom } from "jotai";
+import { editorAtom } from "../store/atoms";
 
 export const EditorLoading = () => {
     return <LoadingView message="Loading Editor" />
@@ -32,6 +34,8 @@ export const EditorError = () => {
 
 
 export const Editor = ({ workflowId }: { workflowId: string }) => {
+
+    const setEditor = useSetAtom(editorAtom)
 
     const { data: workflow, isLoading, error } = useWorkflow(workflowId)
     const { resolvedTheme } = useTheme()
@@ -85,8 +89,14 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 nodeTypes={nodeComponents}
+                onInit={setEditor}
                 fitView
                 colorMode={colorMode}
+                snapGrid={[10, 10]}
+                snapToGrid
+                panOnScroll
+                panOnDrag={false}
+                selectionOnDrag
             >
                 <Background />
                 <Controls />
