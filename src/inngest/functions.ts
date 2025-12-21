@@ -1,41 +1,50 @@
+import prisma from "@/lib/db";
 import { inngest } from "./client";
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import { generateText } from "ai";
-import { createGroq } from '@ai-sdk/groq';
+import { NonRetriableError } from "inngest"
+import { topologicalSort } from "./utils";
+import { NodeType } from "@/generated/prisma";
+import { getExecuter } from "@/features/executions/lib/executor-registry";
 
-const google = createGoogleGenerativeAI();
-const groq = createGroq({});
 
-export const execute = inngest.createFunction(
-    { id: "execute-ai" },
-    { event: "execute/ai" },
+
+export const executeWorkflow = inngest.createFunction(
+    { id: "execute-workflow" },
+    { event: "workflows/execute.workflows" },
     async ({ event, step }) => {
-        const { text: geminiText } = await step.ai.wrap("gemini-generate-text", generateText, {
-            model: google('gemini-2.5-flash'),
-            system: "You are Donald Trump",
-            prompt: "What is US Dream ? ",
-            experimental_telemetry: {
-                isEnabled: true,
-                recordInputs: true,
-                recordOutputs: true,
-            },
-        })
-        const { text: groqText } = await step.ai.wrap("groq-generate-text", generateText, {
-            model: groq('openai/gpt-oss-120b'),
-            providerOptions: {
-                groq: {
-                    reasoningEffort: 'medium',
+
+        const workflowId = event.data.workflowId
+        if (!workflowId) {
+            throw new NonRetriableError("workflow id is missing !")
+        }
+
+        const sortedNodes = await step.run("prepare-workflow", async () => {
+            const workflow = await prisma.workflow.findUniqueOrThrow({
+                where: { id: workflowId },
+                include: {
+                    nodes: true, connections: true
                 }
-            },
-            system: "You are Donald Trump",
-            prompt: "What is US Dream ? ",
-            experimental_telemetry: {
-                isEnabled: true,
-                recordInputs: true,
-                recordOutputs: true,
-            },
+            })
+
+            return topologicalSort(workflow.nodes, workflow.connections)
         })
 
-        return { geminiText, groqText };
+        // intialize the context
+
+        let context = event.data.intialData || {}
+
+        // execute each node
+        for (const node of sortedNodes) {
+            const executor = getExecuter(node.type as NodeType)
+            context = await executor({
+                data: node.data as Record<string, unknown>,
+                nodeId: node.id,
+                context,
+                step,
+            })
+        }
+
+        return { workflowId, result: context }
+
+
     },
 );
