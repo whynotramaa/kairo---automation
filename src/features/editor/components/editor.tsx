@@ -23,6 +23,8 @@ import { AddNodeButton } from "./add-node-button";
 import { useTheme } from "next-themes"
 import { useSetAtom } from "jotai";
 import { editorAtom } from "../store/atoms";
+import { NodeType } from "@/generated/prisma";
+import { ExecuteWorkflowBtn } from "./execute-workflow-button";
 
 export const EditorLoading = () => {
     return <LoadingView message="Loading Editor" />
@@ -45,6 +47,7 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         [resolvedTheme],
     )
 
+
     const [nodes, setNodes] = useState<Node[]>([])
     const [edges, setEdges] = useState<Edge[]>([])
 
@@ -66,6 +69,10 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
         (params: Connection) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
         [],
     );
+
+    const hasManualTrigger = useMemo(() => {
+        return nodes.some((node) => node.type === NodeType.MANUAL_TRIGGER)
+    }, [nodes])
 
 
     if (isLoading && !workflow) {
@@ -105,6 +112,11 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
                 <Panel position="top-right">
                     <AddNodeButton />
                 </Panel>
+                {hasManualTrigger &&
+                    (<Panel position="bottom-center">
+                        <ExecuteWorkflowBtn workflowId={workflowId} />
+                    </Panel>)
+                }
 
             </ReactFlow>
         </div>
