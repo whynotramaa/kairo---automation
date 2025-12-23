@@ -79,19 +79,19 @@ export const StripeTriggerDialog = ({ open, onOpenChange }: StripeTriggerProps) 
                                 <ul className="text-sm text-muted-foreground space-y-1">
                                     <li>
                                         <code className="bg-background px-1 py-0.5 rounded">
-                                            {"{{stripe.amount}}"}
+                                            {"{{stripe.raw.amount}}"}
                                         </code>
                                         - Payment amount
                                     </li>
                                     <li>
                                         <code className="bg-background px-1 py-0.5 rounded">
-                                            {"{{stripe.currency}}"}
+                                            {"{{stripe.raw.currency}}"}
                                         </code>
                                         - Currency Code
                                     </li>
                                     <li>
                                         <code className="bg-background px-1 py-0.5 rounded">
-                                            {"{{stripe.customerId}}"}
+                                            {"{{stripe.raw.customerId}}"}
                                         </code>
                                         - Customer ID
                                     </li>
