@@ -7,6 +7,7 @@ import { getExecuter } from "@/features/executions/lib/executor-registry";
 import { httpReqChannel } from "./channels/http-request";
 import { manualTriggerChannel } from "./channels/manual-trigger";
 import { GoogleFormTriggerChannel } from "./channels/google-form-trigger";
+import { StripeTriggerChannel } from "./channels/stripe-trigger";
 
 
 
@@ -17,7 +18,8 @@ export const executeWorkflow = inngest.createFunction(
         channels: [
             httpReqChannel(),
             manualTriggerChannel(),
-            GoogleFormTriggerChannel()
+            GoogleFormTriggerChannel(),
+            StripeTriggerChannel(),
         ],
     },
     async ({ event, step, publish }) => {

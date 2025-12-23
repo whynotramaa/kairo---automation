@@ -13,9 +13,9 @@ Handlebars.registerHelper("json", (context) => {
 })
 
 type HttpRequestData = {
-    variableName: string;
-    endpoint: string;
-    method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
+    variableName?: string;
+    endpoint?: string;
+    method?: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
     body?: string;
 }
 
@@ -27,53 +27,52 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({ data,
         status: "loading"
     }))
 
-    if (!data.endpoint) {
-
-        await publish(httpReqChannel().status({
-            nodeId,
-            status: "error"
-        }))
-
-        throw new NonRetriableError("HTTP Request Node: No Endpoint Configured")
-    }
-    if (!data.variableName) {
-
-        await publish(httpReqChannel().status({
-            nodeId,
-            status: "error"
-        }))
-
-        throw new NonRetriableError("HTTP Request Node: Variable Name Not Configured")
-    }
-    if (!data.method) {
-
-        await publish(httpReqChannel().status({
-            nodeId,
-            status: "error"
-        }))
-
-        throw new NonRetriableError("HTTP Request Node: Methods Not Configured")
-    }
-
-    // Validate body JSON for POST, PUT, PATCH methods before execution
-    if (["POST", "PUT", "PATCH"].includes(data.method) && data.body) {
-        try {
-            // First check if it's valid JSON (before Handlebars processing)
-            // If body contains Handlebars templates, compile and check the result
-            const resolved = Handlebars.compile(data.body)(context)
-            JSON.parse(resolved)
-        } catch {
-            await publish(httpReqChannel().status({
-                nodeId,
-                status: "error"
-            }))
-            throw new NonRetriableError("HTTP Request Node: Body must be valid JSON")
-        }
-    }
 
     try {
         const result = await step.run("HTTP-request", async () => {
+            if (!data.endpoint) {
 
+                await publish(httpReqChannel().status({
+                    nodeId,
+                    status: "error"
+                }))
+
+                throw new NonRetriableError("HTTP Request Node: No Endpoint Configured")
+            }
+            if (!data.variableName) {
+
+                await publish(httpReqChannel().status({
+                    nodeId,
+                    status: "error"
+                }))
+
+                throw new NonRetriableError("HTTP Request Node: Variable Name Not Configured")
+            }
+            if (!data.method) {
+
+                await publish(httpReqChannel().status({
+                    nodeId,
+                    status: "error"
+                }))
+
+                throw new NonRetriableError("HTTP Request Node: Methods Not Configured")
+            }
+
+            // Validate body JSON for POST, PUT, PATCH methods before execution
+            if (["POST", "PUT", "PATCH"].includes(data.method) && data.body) {
+                try {
+                    // First check if it's valid JSON (before Handlebars processing)
+                    // If body contains Handlebars templates, compile and check the result
+                    const resolved = Handlebars.compile(data.body)(context)
+                    JSON.parse(resolved)
+                } catch {
+                    await publish(httpReqChannel().status({
+                        nodeId,
+                        status: "error"
+                    }))
+                    throw new NonRetriableError("HTTP Request Node: Body must be valid JSON")
+                }
+            }
             const method = data.method
 
             const endpoint = Handlebars.compile(data.endpoint)(context)
@@ -119,7 +118,9 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({ data,
         }))
 
         return result
+
     }
+
     catch (error) {
         await publish(httpReqChannel().status({
             nodeId,
