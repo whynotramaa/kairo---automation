@@ -17,13 +17,13 @@ import z from "zod";
 
 
 export const AVAILABLE_MODELS = [
-    "gemma2-9b-it",
-    "llama-3.1-8b-instant",
-    "deepseek-r1-distill-llama-70b",
-    "moonshotai/kimi-k2-instruct-0905",
-    "mixtral-8x7b-32768",
-    "qwen-2.5-32b",
-    "openai/gpt-oss-20b",
+    "claude-opus-4-5-20250514",
+    "claude-haiku-4-5-20251001",
+    "claude-sonnet-4-5-20250929",
+    "claude-opus-4-1-20250514",
+    "claude-opus-4-20250514",
+    "claude-sonnet-4-20250514",
+    "claude-3-5-sonnet-20241022",
 ] as const
 
 
@@ -35,23 +35,23 @@ const formSchema = z.object({
     userPrompt: z.string().min(1, "User prompt is required"),
 })
 
-export type GroqFormValues = z.infer<typeof formSchema>
+export type AnthropicFormValues = z.infer<typeof formSchema>
 
-interface GroqProps {
+interface AnthropicProps {
     open: boolean,
     onOpenChange: (open: boolean) => void;
     onSubmit: (values: z.infer<typeof formSchema>) => void;
-    defaultValues?: Partial<GroqFormValues>
+    defaultValues?: Partial<AnthropicFormValues>
 }
 
-export const GroqDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }: GroqProps) => {
+export const AnthropicDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }: AnthropicProps) => {
 
-    const { data: credentials, isLoading: isLoadingCredentials } = useCredentialsByType(CredentialType.GROQ)
+    const { data: credentials, isLoading: isLoadingCredentials } = useCredentialsByType(CredentialType.ANTHROPIC)
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            variableName: defaultValues.variableName || "Groq",
+            variableName: defaultValues.variableName || "claude",
             credentialId: defaultValues.credentialId || "",
             model: defaultValues.model || AVAILABLE_MODELS[0],
             systemPrompt: defaultValues.systemPrompt || "",
@@ -63,8 +63,8 @@ export const GroqDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
     useEffect(() => {
         if (open) {
             form.reset({
-                variableName: defaultValues.variableName || "Groq",
-                credentialId: defaultValues.credentialId || "AI- xxx xxx xxxx",
+                variableName: defaultValues.variableName || "claude",
+                credentialId: defaultValues.credentialId || "",
                 model: defaultValues.model || AVAILABLE_MODELS[0],
                 systemPrompt: defaultValues.systemPrompt || "",
                 userPrompt: defaultValues.userPrompt || ""
@@ -72,7 +72,7 @@ export const GroqDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
         }
     }, [open, defaultValues, form])
 
-    const watchVarName = form.watch("variableName") || "Groq"
+    const watchVarName = form.watch("variableName") || "claude"
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         onSubmit(values)
@@ -83,9 +83,9 @@ export const GroqDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
         <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Groq</DialogTitle>
+                    <DialogTitle>Anthropic Claude</DialogTitle>
                     <DialogDescription>
-                        Configure AI models and prompt for Groq .
+                        Configure AI models and prompt for Claude.
                     </DialogDescription>
                 </DialogHeader>
                 <FormProvider {...form}>
@@ -98,7 +98,7 @@ export const GroqDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
                                     <FormLabel>AI Node Name</FormLabel>
 
                                     <FormControl>
-                                        <Input placeholder="Groq-node" {...field} />
+                                        <Input placeholder="claude-node" {...field} />
                                     </FormControl>
                                     <FormDescription>
                                         Use this name to reference the result in other nodes. {" "}
@@ -125,7 +125,7 @@ export const GroqDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
                                         : "No credentials found"
                                 return (
                                     <FormItem>
-                                        <FormLabel>Groq Credential</FormLabel>
+                                        <FormLabel>Anthropic Credential</FormLabel>
 
                                         <Select
                                             onValueChange={field.onChange}
@@ -137,7 +137,7 @@ export const GroqDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
                                                     <SelectValue>
                                                         {selectedCredential ? (
                                                             <div className="flex items-center gap-2">
-                                                                <Image src="/logos/groq.svg" alt={selectedCredential.name} width={16} height={16} />
+                                                                <Image src="/logos/claude-ai-icon.svg" alt={selectedCredential.name} width={16} height={16} />
                                                                 {selectedCredential.name}
                                                             </div>
                                                         ) : (
@@ -151,7 +151,7 @@ export const GroqDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }:
                                                 {credentials?.map((credential) => (
                                                     <SelectItem key={credential.id} value={credential.id}>
                                                         <div className="flex items-center gap-2">
-                                                            <Image src="/logos/groq.svg" alt={credential.name} width={16} height={16} />
+                                                            <Image src="/logos/claude-ai-icon.svg" alt={credential.name} width={16} height={16} />
                                                             {credential.name}
                                                         </div>
                                                     </SelectItem>

@@ -3,7 +3,7 @@ import Handlebars from "handlebars"
 import { NodeExecutor } from "@/features/executions/types";
 import { NonRetriableError } from "inngest";
 
-import { createOpenAI, openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { openaiChannel } from "@/inngest/channels/openai";
 

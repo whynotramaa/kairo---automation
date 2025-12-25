@@ -64,6 +64,12 @@ const executionNodes: NodeTypeOption[] = [
         description: "Uses open-source models to generate text",
         icon: "/logos/groq.svg"
     },
+    {
+        type: NodeType.ANTHROPIC,
+        label: "Claude",
+        description: "Uses Anthropic Claude to generate text",
+        icon: "/logos/claude-ai-icon.svg"
+    },
 ]
 
 

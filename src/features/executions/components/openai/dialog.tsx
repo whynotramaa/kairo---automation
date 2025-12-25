@@ -6,7 +6,10 @@ import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessa
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useCredentialsByType } from "@/features/credentials/hooks/use-credentials";
+import { CredentialType } from "@/generated/prisma";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
@@ -27,7 +30,7 @@ export const AVAILABLE_MODELS = [
 
 const formSchema = z.object({
     variableName: z.string().min(1, { message: "Variable name is required" }).regex(/^[A-Za-z_$][A-Za-z0-9_$]*$/, { message: "Variable name must start with letter or underscore and must not contain other special chars" }),
-
+    credentialId: z.string().min(1, "Credential ID is required"),
     model: z.string().min(1, "AI Model is required"),
     systemPrompt: z.string().optional(),
     userPrompt: z.string().min(1, "User prompt is required"),
@@ -44,10 +47,13 @@ interface OpenAIProps {
 
 export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }: OpenAIProps) => {
 
+    const { data: credentials, isLoading: isLoadingCredentials } = useCredentialsByType(CredentialType.OPENAI)
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             variableName: defaultValues.variableName || "openAI",
+            credentialId: defaultValues.credentialId || "",
             model: defaultValues.model || AVAILABLE_MODELS[0],
             systemPrompt: defaultValues.systemPrompt || "",
             userPrompt: defaultValues.userPrompt || ""
@@ -59,6 +65,7 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
         if (open) {
             form.reset({
                 variableName: defaultValues.variableName || "OpenAI",
+                credentialId: defaultValues.credentialId || "",
                 model: defaultValues.model || AVAILABLE_MODELS[0],
                 systemPrompt: defaultValues.systemPrompt || "",
                 userPrompt: defaultValues.userPrompt || ""
@@ -109,33 +116,91 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
 
                         <FormField
                             control={form.control}
+                            name="credentialId"
+                            render={({ field }) => {
+                                const selectedCredential = credentials?.find(c => c.id === field.value)
+                                const placeholderText = isLoadingCredentials
+                                    ? "Loading credentials..."
+                                    : credentials?.length
+                                        ? "Select your credential to use"
+                                        : "No credentials found"
+                                return (
+                                    <FormItem>
+                                        <FormLabel>OpenAI Credential</FormLabel>
+
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value || ""}
+                                            disabled={isLoadingCredentials}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue>
+                                                        {selectedCredential ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <Image src="/logos/openai.svg" alt={selectedCredential.name} width={16} height={16} />
+                                                                {selectedCredential.name}
+                                                            </div>
+                                                        ) : (
+                                                            <span className="text-muted-foreground">{placeholderText}</span>
+                                                        )}
+                                                    </SelectValue>
+                                                </SelectTrigger>
+                                            </FormControl>
+
+                                            <SelectContent>
+                                                {credentials?.map((credential) => (
+                                                    <SelectItem key={credential.id} value={credential.id}>
+                                                        <div className="flex items-center gap-2">
+                                                            <Image src="/logos/openai.svg" alt={credential.name} width={16} height={16} />
+                                                            {credential.name}
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )
+                            }}
+                        />
+
+                        {/* ------------------ */}
+                        <FormField
+                            control={form.control}
                             name="model"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Model</FormLabel>
+                            render={({ field }) => {
+                                const selectedModel = AVAILABLE_MODELS.find(m => m === field.value)
+                                return (
+                                    <FormItem>
+                                        <FormLabel>Model</FormLabel>
 
-                                    <Select
-                                        onValueChange={field.onChange}
-                                        defaultValue={field.value}
-                                    >
-                                        <FormControl>
-                                            <SelectTrigger className="w-full">
-                                                <SelectValue placeholder="Select a model" />
-                                            </SelectTrigger>
-                                        </FormControl>
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value}
+                                        >
+                                            <FormControl>
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue>
+                                                        {selectedModel || <span className="text-muted-foreground">Select a model</span>}
+                                                    </SelectValue>
+                                                </SelectTrigger>
+                                            </FormControl>
 
-                                        <SelectContent>
-                                            {AVAILABLE_MODELS.map((model) => (
-                                                <SelectItem key={model} value={model}>
-                                                    {model}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
+                                            <SelectContent>
+                                                {AVAILABLE_MODELS.map((model) => (
+                                                    <SelectItem key={model} value={model}>
+                                                        {model}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
 
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )
+                            }}
                         />
 
                         {/* ------------------ */}
