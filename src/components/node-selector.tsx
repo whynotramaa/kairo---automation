@@ -45,7 +45,25 @@ const executionNodes: NodeTypeOption[] = [
         label: "HTTP Request",
         description: "Makes an HTTP request",
         icon: GlobeIcon
-    }
+    },
+    {
+        type: NodeType.GEMINI,
+        label: "Gemini ",
+        description: "Uses Google Gemini to generate text",
+        icon: "/logos/gemini.svg"
+    },
+    {
+        type: NodeType.OPENAI,
+        label: "Chat GPT ",
+        description: "Uses ChatGPT to generate text",
+        icon: "/logos/openai.svg"
+    },
+    {
+        type: NodeType.GROQ,
+        label: "Groq Provider",
+        description: "Uses open-source models to generate text",
+        icon: "/logos/groq.svg"
+    },
 ]
 
 
