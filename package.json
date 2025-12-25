@@ -12,6 +12,7 @@
     "dev:all": "mprocs"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.1",
     "@ai-sdk/google": "^3.0.1",
     "@ai-sdk/groq": "^3.0.1",
     "@ai-sdk/openai": "^3.0.1",

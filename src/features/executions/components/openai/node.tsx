@@ -2,6 +2,7 @@
 
 import { Node, NodeProps, useReactFlow } from "@xyflow/react"
 import { memo, useState } from "react"
+import { useTheme } from "next-themes"
 import { BaseExecNode } from "../base-execution-node"
 import { AVAILABLE_MODELS, OpenAIDialog, OpenAIFormValues } from "./dialog"
 import { useNodeStatus } from "../../hooks/use-node-status"
@@ -21,6 +22,7 @@ type OpenAINodeType = Node<OpenAINodeData>
 export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
 
     const { setNodes } = useReactFlow()
+    const { resolvedTheme } = useTheme()
 
     const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -47,6 +49,7 @@ export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
         ? `${nodeData.model || AVAILABLE_MODELS[0]} : ${nodeData.userPrompt.slice(0, 49)}...`
         : "Not Configured"
 
+    const openaiIcon = resolvedTheme === "dark" ? "/logos/openai_dark.svg" : "/logos/openai.svg"
 
     return (
         <>
@@ -59,7 +62,7 @@ export const OpenAINode = memo((props: NodeProps<OpenAINodeType>) => {
             <BaseExecNode
                 {...props}
                 id={props.id}
-                icon="/logos/openai.svg"
+                icon={openaiIcon}
                 name="ChatGPT"
                 description={description}
                 status={nodeStatus}
