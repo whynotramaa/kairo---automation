@@ -17,13 +17,13 @@ import z from "zod";
 
 
 export const AVAILABLE_MODELS = [
-    "claude-opus-4-5",
-    "claude-haiku-4-5",
-    "claude-sonnet-4-5",
-    "claude-opus-4-1",
-    "claude-opus-4-0",
-    "claude-sonnet-4-0",
-    "claude-3-7-sonnet-latest",
+    "claude-opus-4-5-20250514",
+    "claude-haiku-4-5-20251001",
+    "claude-sonnet-4-5-20250929",
+    "claude-opus-4-1-20250514",
+    "claude-opus-4-20250514",
+    "claude-sonnet-4-20250514",
+    "claude-3-5-sonnet-20241022",
 ] as const
 
 
