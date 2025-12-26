@@ -5,7 +5,8 @@ import { useExecutionsParams } from "../hooks/use-executions-params";
 import { Execution, ExecutionStatus } from "@/generated/prisma";
 import { CheckCircle2Icon, Clock8Icon, Loader2Icon, XCircleIcon } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { useExecutionsList } from "../hooks/use-executions";
+import { useExecutionsList, usePrefetchExecutions } from "../hooks/use-executions";
+import { memo } from "react";
 
 
 export const ExecutionsList = () => {
@@ -37,7 +38,7 @@ export const ExecutionsList = () => {
         <EntityList
             items={executions.data.items}
             getKey={(execution) => execution.id}
-            renderItem={(credential) => <p>{<ExecutionsItem data={credential} />}</p>}
+            renderItem={(execution) => <ExecutionsItem data={execution} />}
             emptyView={<ExecutionsEmpty />}
         />)
 }
@@ -118,9 +119,11 @@ const formatStatus = (status: ExecutionStatus) => {
 }
 
 
-export const ExecutionsItem = ({
+export const ExecutionsItem = memo(function ExecutionsItem({
     data
-}: { data: Execution & { workflow: { id: string; name: string; } } }) => {
+}: { data: Execution & { workflow: { id: string; name: string; } } }) {
+
+    const prefetch = usePrefetchExecutions()
 
     const duration = data.completedAt
         ? Math.round(
@@ -141,6 +144,7 @@ export const ExecutionsItem = ({
             href={`/executions/${data.id}`}
             title={formatStatus(data.status)}
             subtitle={subtitle}
+            onMouseEnter={() => prefetch(data.id)}
             image={
                 <div className="size-8 flex items-center justify-center">
                     {getStatusIcon(data.status)}
@@ -148,6 +152,5 @@ export const ExecutionsItem = ({
             }
         />
     )
-}
-
+})
 
