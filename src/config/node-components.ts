@@ -9,6 +9,8 @@ import { GeminiNode } from "@/features/executions/components/gemini/node"
 import { OpenAINode } from "@/features/executions/components/openai/node"
 import { GroqNode } from "@/features/executions/components/groq/node"
 import { AnthropicNode } from "@/features/executions/components/anthropic/node"
+import { DiscordNode } from "@/features/executions/components/discord/node"
+import { SlackNode } from "@/features/executions/components/slack/node"
 
 export const nodeComponents = {
     [NodeType.INITIAL]: InitialNode,
@@ -20,6 +22,8 @@ export const nodeComponents = {
     [NodeType.OPENAI]: OpenAINode,
     [NodeType.GROQ]: GroqNode,
     [NodeType.ANTHROPIC]: AnthropicNode,
+    [NodeType.DISCORD]: DiscordNode,
+    [NodeType.SLACK]: SlackNode,
 
 } as const satisfies NodeTypes
 

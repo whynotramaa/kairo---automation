@@ -70,6 +70,18 @@ const executionNodes: NodeTypeOption[] = [
         description: "Uses Anthropic Claude to generate text",
         icon: "/logos/claude-ai-icon.svg"
     },
+    {
+        type: NodeType.DISCORD,
+        label: "Discord",
+        description: "Automate Discord messages through Kairo",
+        icon: "/logos/discord.svg"
+    },
+    {
+        type: NodeType.SLACK,
+        label: "Slack",
+        description: "Automate Slack messages through Kairo",
+        icon: "/logos/slack.svg"
+    },
 ]
 
 

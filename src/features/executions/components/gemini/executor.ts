@@ -6,6 +6,7 @@ import { geminiChannel } from "@/inngest/channels/gemini";
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
 import { generateText } from "ai"
+import prisma from "@/lib/db";
 
 
 
@@ -19,12 +20,13 @@ Handlebars.registerHelper("json", (context) => {
 type GeminiData = {
     variableName?: string;
     model?: string;
+    credentialId?: string;
     systemPrompt?: string;
     userPrompt?: string;
 }
 
 
-export const GeminiExecutor: NodeExecutor<GeminiData> = async ({ data, nodeId, step, context, publish }) => {
+export const GeminiExecutor: NodeExecutor<GeminiData> = async ({ data, nodeId, userId, step, context, publish }) => {
     // TODO PUBLISH loading state
     await publish(geminiChannel().status({
         nodeId,
@@ -50,8 +52,25 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({ data, nodeId, s
 
     }
 
-    // throw error if credentials is missing 
 
+    const credential = await step.run("get-credential", () => {
+        return prisma.credential.findUnique({
+            where: {
+                id: data.credentialId,
+                userId,
+            }
+        })
+    })
+
+    if (!credential) {
+        await publish(
+            geminiChannel().status({
+                nodeId,
+                status: "error",
+            })
+        )
+        throw new NonRetriableError("GEMINI Node: Credentials not found !")
+    }
     const systemPrompt = data.systemPrompt
         ? Handlebars.compile(data.systemPrompt)(context)
         : "Act as Harvey Specter"
@@ -61,10 +80,9 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({ data, nodeId, s
         : "Act as Harvey Specter"
 
 
-    const credentialValue = process.env.GOOGLE_GENERATIVE_AI_API_KEY!;
 
     const google = createGoogleGenerativeAI({
-        apiKey: credentialValue
+        apiKey: credential.value
     })
 
     try {
