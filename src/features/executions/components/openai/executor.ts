@@ -6,6 +6,7 @@ import { NonRetriableError } from "inngest";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { openaiChannel } from "@/inngest/channels/openai";
+import prisma from "@/lib/db";
 
 
 
@@ -18,13 +19,14 @@ Handlebars.registerHelper("json", (context) => {
 
 type OpenAIData = {
     variableName?: string;
+    credentialId?: string;
     model?: string;
     systemPrompt?: string;
     userPrompt?: string;
 }
 
 
-export const OpenAIExecutor: NodeExecutor<OpenAIData> = async ({ data, nodeId, step, context, publish }) => {
+export const OpenAIExecutor: NodeExecutor<OpenAIData> = async ({ data, userId, nodeId, step, context, publish }) => {
     // TODO PUBLISH loading state
     await publish(openaiChannel().status({
         nodeId,
@@ -50,8 +52,25 @@ export const OpenAIExecutor: NodeExecutor<OpenAIData> = async ({ data, nodeId, s
 
     }
 
-    // throw error if credentials is missing 
 
+    const credential = await step.run("get-credential", () => {
+        return prisma.credential.findUnique({
+            where: {
+                id: data.credentialId,
+                userId,
+            }
+        })
+    })
+
+    if (!credential) {
+        await publish(
+            openaiChannel().status({
+                nodeId,
+                status: "error",
+            })
+        )
+        throw new NonRetriableError("OPEN AI Node: Credentials not found !")
+    }
     const systemPrompt = data.systemPrompt
         ? Handlebars.compile(data.systemPrompt)(context)
         : "Act as Harvey Specter"
@@ -61,10 +80,9 @@ export const OpenAIExecutor: NodeExecutor<OpenAIData> = async ({ data, nodeId, s
         : "Act as Harvey Specter"
 
 
-    const credentialValue = process.env.OPENAI_API_KEY!;
 
     const openai = createOpenAI({
-        apiKey: credentialValue
+        apiKey: credential.value
     })
 
     try {
