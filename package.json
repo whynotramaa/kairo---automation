@@ -52,6 +52,7 @@
     "lucide-react": "^0.561.0",
     "next": "15.5.5",
     "next-themes": "^0.4.6",
+    "nextjs-toploader": "^3.9.17",
     "nuqs": "^2.8.5",
     "phosphor-icons": "^1.4.2",
     "random-word-slugs": "^0.1.7",
