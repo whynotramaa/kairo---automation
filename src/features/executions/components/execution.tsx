@@ -14,7 +14,7 @@ import {
     ChevronRightIcon,
     TerminalIcon,
     WorkflowIcon,
-    SparklesIcon
+
 } from "lucide-react"
 import { useExecutions } from "../hooks/use-executions"
 import { useState } from "react"
@@ -25,7 +25,6 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
-import { AIMarkdown } from "@/components/ai-markdown"
 
 const getStatusConfig = (status: ExecutionStatus) => {
     switch (status) {

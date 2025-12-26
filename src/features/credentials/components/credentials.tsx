@@ -10,6 +10,8 @@ import { useCredential, useCredentialsList, usePrefetchCredential, useRemoveCred
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { CredentialsForm } from "./credential-form";
+import { useTheme } from "next-themes";
+import { useState, useEffect } from "react";
 
 
 export const CredentialsSearch = () => {
@@ -133,19 +135,34 @@ const credentialLogos: Record<CredentialType, string> = {
     [CredentialType.ANTHROPIC]: "/logos/claude-ai-icon.svg",
 }
 
+const getCredentialLogo = (type: CredentialType, isDark: boolean): string => {
+    if (type === CredentialType.OPENAI) {
+        return isDark ? "/logos/openai_dark.svg" : "/logos/openai.svg"
+    }
+    return credentialLogos[type] || "/logos/gemini.svg"
+}
+
 export const CredentialsItem = ({
     data
 }: { data: Credential }) => {
 
     const removeCredentials = useRemoveCredential()
     const prefetchCredentials = usePrefetchCredential()
+    const { resolvedTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    const isDark = mounted && resolvedTheme === "dark"
 
     const handleRemove = () => {
         removeCredentials.mutate({ id: data.id })
 
     }
 
-    const logo = credentialLogos[data.type] || "/logos/gemini.svg"
+    const logo = getCredentialLogo(data.type, isDark)
 
     const handleMouseEnter = () => {
         prefetchCredentials(data.id)

@@ -10,9 +10,10 @@ import { useCredentialsByType } from "@/features/credentials/hooks/use-credentia
 import { CredentialType } from "@/generated/prisma";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
+import { useTheme } from "next-themes";
 
 
 
@@ -48,6 +49,15 @@ interface OpenAIProps {
 export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }: OpenAIProps) => {
 
     const { data: credentials, isLoading: isLoadingCredentials } = useCredentialsByType(CredentialType.OPENAI)
+    const { resolvedTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    const isDark = mounted && resolvedTheme === "dark"
+    const openaiIcon = isDark ? "/logos/openai_dark.svg" : "/logos/openai.svg"
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -138,7 +148,7 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                                                     <SelectValue>
                                                         {selectedCredential ? (
                                                             <div className="flex items-center gap-2">
-                                                                <Image src="/logos/openai.svg" alt={selectedCredential.name} width={16} height={16} />
+                                                                <Image src={openaiIcon} alt={selectedCredential.name} width={16} height={16} />
                                                                 {selectedCredential.name}
                                                             </div>
                                                         ) : (
@@ -152,7 +162,7 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                                                 {credentials?.map((credential) => (
                                                     <SelectItem key={credential.id} value={credential.id}>
                                                         <div className="flex items-center gap-2">
-                                                            <Image src="/logos/openai.svg" alt={credential.name} width={16} height={16} />
+                                                            <Image src={openaiIcon} alt={credential.name} width={16} height={16} />
                                                             {credential.name}
                                                         </div>
                                                     </SelectItem>
