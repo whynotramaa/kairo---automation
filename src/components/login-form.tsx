@@ -41,6 +41,31 @@ export function LoginForm() {
         }
     })
 
+    const signInGithub = async () => {
+        await authClient.signIn.social({
+            provider: "github"
+        }, {
+            onSuccess: () => {
+                router.push('/')
+            },
+            onError: () => {
+                toast.error("Something went wrong")
+            }
+        })
+    }
+    const signInGoogle = async () => {
+        await authClient.signIn.social({
+            provider: "google"
+        }, {
+            onSuccess: () => {
+                router.push('/')
+            },
+            onError: () => {
+                toast.error("Something went wrong")
+            }
+        })
+    }
+
     const onSubmit = async (values: LoginFormValues) => {
         console.log(values)
 
@@ -80,11 +105,11 @@ export function LoginForm() {
                         <form onSubmit={form.handleSubmit(onSubmit)}>
                             <div className="grid gap-6">
                                 <div className="flex flex-col gap-4">
-                                    <Button variant={"outline"} className="w-full" type="button" disabled={isPending}>
+                                    <Button variant={"outline"} className="w-full" type="button" onClick={signInGithub} disabled={isPending}>
                                         <GithubLogo size={32} />
                                         Continue with GitHub
                                     </Button>
-                                    <Button variant={"outline"} className="w-full" type="button" disabled={isPending}>
+                                    <Button variant={"outline"} className="w-full" type="button" onClick={signInGoogle} disabled={isPending}>
                                         <GoogleLogo size={32} />
                                         Continue with Google
                                     </Button>

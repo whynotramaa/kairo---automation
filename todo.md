@@ -8,3 +8,6 @@
 ### Nodes
 
 - whatsapp and telegram nodes
+
+
+- redesign upgrade modal
