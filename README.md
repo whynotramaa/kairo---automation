@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧩 Kairo — Visual Workflow Automation
 
-## Getting Started
 
-First, run the development server:
+<p align="center">
+  <img src="github-images/1.png" width="900" />
+</p>
+
+Kairo is a modern workflow automation platform that lets you design, run, and monitor complex automations without code. Build flows visually, connect APIs, integrate AI, and orchestrate background jobs reliably.
+
+<br />
+<br />
+
+<p align="center">
+  <img src="public/logos/openai_dark.svg" width="50" />
+  <img src="public/logos/claude-ai-icon.svg" width="50" />
+  <img src="public/logos/groq.svg" width="50" />
+  <img src="public/logos/gemini.svg" width="50" />
+  <img src="public/logos/discord.svg" width="50" />
+  <img src="public/logos/stripe.svg" width="50" />
+  <img src="public/logos/meta.svg" width="50" />
+  <img src="public/logos/kimi-icon.svg" width="50" />
+</p>
+
+<br />
+<br />
+
+
+## ✨ What Kairo Does
+
+- 🧠 Visual, drag-and-drop workflow builder  
+- ⚙️ Unlimited background executions  
+- 🤖 Built-in AI providers (OpenAI, Gemini, Groq, Claude)  
+- 💬 Discord & Slack messaging nodes  
+- 📝 Google Forms automation (triggers)  
+- 🌐 HTTP request actions with templating  
+- 📜 Execution logs and history  
+- 🔐 Encrypted credentials, user-scoped and secure  
+
+WhatsApp and Telegram integrations are coming soon.
+
+---
+
+
+<p align="center">
+  <img src="github-images/2.png" width="400" />
+   <img src="github-images/3.png" width="400" />
+</p>
+<br/>
+<br/>
+<br/>
+## 🏗 Built on a Modern Stack
+
+>
+
+- Next.js + React  
+- tRPC, Prisma, PostgreSQL  
+- Inngest for durable workflow execution  
+- Sentry monitoring  
+- Secure credential encryption
+
+---
+
+## 🧩 Example Workflows
+
+<p align="center">
+  <img src="github-images/4.png" width="700" />
+</p>
+
+- Google Form ➜ AI Analysis ➜ Slack Alert  
+- Stripe Event ➜ AI Summary ➜ Discord Notification  
+- Manual Trigger ➜ Multiple API Calls ➜ Store Results  
+- Webhook ➜ HTTP Request ➜ AI Enhancement ➜ Output
+
+---
+
+
+## 👩‍💻 Development
+
+### Scripts
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run build
+npm run start
+npm run lint
+npm run ngrok:dev
+npm run inngest:dev
+npm run dev:all
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment Variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Includes database, encryption, OAuth, billing, and Sentry keys.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛣 Roadmap
 
-To learn more about Next.js, take a look at the following resources:
+Planned:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- WhatsApp + Telegram nodes
+- Better validation feedback
+- UI enhancements
+- Upgrade flow improvements
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📄 Summary
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Kairo combines the simplicity of no-code tools with the power of a production-grade automation engine. Secure, extensible, and ready for real workloads.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+
+Star the repo and follow along — more coming soon.
