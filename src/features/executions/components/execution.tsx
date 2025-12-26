@@ -235,7 +235,7 @@ export const ExecutionView = ({ executionId }: { executionId: string }) => {
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <ExecutionOutput output={execution.output} />
+                        <ExecutionOutput output={execution.output as Record<string, unknown>} />
                     </CardContent>
                 </Card>
             )}
@@ -243,56 +243,98 @@ export const ExecutionView = ({ executionId }: { executionId: string }) => {
     )
 }
 
-// Helper to check if a value looks like AI-generated markdown content
-const isAIMarkdownContent = (value: unknown): value is string => {
-    if (typeof value !== "string") return false
-    // Check if it contains markdown indicators
-    const markdownPatterns = [
-        /^#+ /m,           // Headers
-        /\*\*[^*]+\*\*/,   // Bold
-        /\*[^*]+\*/,       // Italic
-        /```[\s\S]*```/,   // Code blocks
-        /`[^`]+`/,         // Inline code
-        /^\s*[-*+] /m,     // Lists
-        /^\s*\d+\. /m,     // Numbered lists
-        /\[[^\]]+\]\([^)]+\)/, // Links
-    ]
-    return markdownPatterns.some(pattern => pattern.test(value))
+// Known AI response key patterns
+const AI_RESPONSE_KEYS = ['aiResponse', 'response', 'text', 'content', 'message', 'messageContent', 'answer', 'output', 'result', 'completion', 'reply']
+
+// Helper to check if a key looks like an AI response field
+const isAIResponseKey = (key: string): boolean => {
+    const lowerKey = key.toLowerCase()
+    return AI_RESPONSE_KEYS.some(aiKey => lowerKey.includes(aiKey.toLowerCase()))
 }
 
-// Helper to extract AI responses from output object
-const extractAIResponses = (output: Record<string, unknown>): { key: string; content: string }[] => {
-    const responses: { key: string; content: string }[] = []
+// Helper to check if content looks like substantial text (not just metadata)
+const isSubstantialContent = (value: string): boolean => {
+    return value.length > 30 && (
+        // Has multiple words
+        value.split(/\s+/).length > 5 ||
+        // Has newlines (likely formatted content)
+        value.includes('\n') ||
+        // Has markdown patterns
+        /[#*`\[\]]/.test(value)
+    )
+}
+
+// Helper to format key for display (e.g., "discord.messageContent" -> "Discord Message Content")
+const formatKeyForDisplay = (key: string): string => {
+    return key
+        .split('.')
+        .map(part =>
+            part
+                // Split camelCase
+                .replace(/([a-z])([A-Z])/g, '$1 $2')
+                // Capitalize first letter of each word
+                .replace(/\b\w/g, c => c.toUpperCase())
+        )
+        .join(' › ')
+}
+
+// Helper to extract AI responses from output object (recursively)
+const extractAIResponses = (output: Record<string, unknown>, parentKey = ''): { key: string; displayKey: string; content: string }[] => {
+    const responses: { key: string; displayKey: string; content: string }[] = []
 
     for (const [key, value] of Object.entries(output)) {
-        if (typeof value === "string" && isAIMarkdownContent(value)) {
-            responses.push({ key, content: value })
-        } else if (typeof value === "object" && value !== null) {
-            // Check nested objects for text/content fields
-            const obj = value as Record<string, unknown>
-            if (typeof obj.text === "string" && isAIMarkdownContent(obj.text)) {
-                responses.push({ key, content: obj.text })
-            } else if (typeof obj.content === "string" && isAIMarkdownContent(obj.content)) {
-                responses.push({ key, content: obj.content })
-            } else if (typeof obj.response === "string" && isAIMarkdownContent(obj.response)) {
-                responses.push({ key, content: obj.response })
-            } else if (typeof obj.message === "string" && isAIMarkdownContent(obj.message)) {
-                responses.push({ key, content: obj.message })
+        const fullKey = parentKey ? `${parentKey}.${key}` : key
+
+        if (typeof value === "string") {
+            // Check if this key suggests AI content OR if it's substantial text content
+            if ((isAIResponseKey(key) || isSubstantialContent(value)) && value.length > 20) {
+                responses.push({
+                    key: fullKey,
+                    displayKey: formatKeyForDisplay(fullKey),
+                    content: value
+                })
             }
+        } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+            // Recursively check nested objects
+            const nestedResponses = extractAIResponses(value as Record<string, unknown>, fullKey)
+            responses.push(...nestedResponses)
         }
     }
 
     return responses
 }
 
-// Get non-AI output (filter out AI responses for separate display)
+// Get non-AI output (filter out extracted AI responses from nested paths)
 const getNonAIOutput = (output: Record<string, unknown>, aiKeys: string[]): Record<string, unknown> => {
     const filtered: Record<string, unknown> = {}
+
     for (const [key, value] of Object.entries(output)) {
-        if (!aiKeys.includes(key)) {
+        // Check if this exact key was extracted
+        if (aiKeys.includes(key)) {
+            continue
+        }
+
+        // Check if any nested path under this key was extracted
+        const nestedExtracted = aiKeys.filter(k => k.startsWith(`${key}.`))
+
+        if (nestedExtracted.length === 0) {
+            // No nested paths extracted, keep the whole value
+            filtered[key] = value
+        } else if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+            // Some nested paths extracted, recursively filter
+            const nestedFiltered = getNonAIOutput(
+                value as Record<string, unknown>,
+                nestedExtracted.map(k => k.slice(key.length + 1))
+            )
+            // Only include if there's remaining content
+            if (Object.keys(nestedFiltered).length > 0) {
+                filtered[key] = nestedFiltered
+            }
+        } else {
             filtered[key] = value
         }
     }
+
     return filtered
 }
 
@@ -306,11 +348,11 @@ const ExecutionOutput = ({ output }: { output: Record<string, unknown> }) => {
     return (
         <div className="divide-y divide-muted/40">
             {/* AI Responses rendered with Streamdown */}
-            {aiResponses.map(({ key, content }) => (
+            {aiResponses.map(({ key, displayKey, content }) => (
                 <div key={key} className="p-6">
                     <div className="flex items-center gap-2 mb-4">
                         <SparklesIcon className="size-4 text-primary" />
-                        <span className="text-sm font-medium text-muted-foreground">{key}</span>
+                        <span className="text-sm font-medium text-muted-foreground">{displayKey}</span>
                     </div>
                     <div className="prose prose-sm dark:prose-invert max-w-none">
                         <AIMarkdown content={content} />
