@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Provider } from "jotai";
+import NextTopLoader from "nextjs-toploader";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -34,6 +35,7 @@ export default function RootLayout({
         />
       </head>
       <body className={`${manrope.variable} font-sans antialiased`}>
+        <NextTopLoader color="#10b981" showSpinner={false} />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

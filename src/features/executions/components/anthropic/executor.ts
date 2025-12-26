@@ -7,6 +7,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 import { AnthropicChannel } from "@/inngest/channels/anthropic";
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 
 
@@ -77,7 +78,7 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({ data, nod
 
 
     const anthropic = createAnthropic({
-        apiKey: credential.value
+        apiKey: decrypt(credential.value)
     })
 
     try {

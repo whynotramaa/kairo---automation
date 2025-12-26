@@ -7,6 +7,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 
 import { generateText } from "ai"
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 
 
@@ -82,7 +83,7 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({ data, nodeId, u
 
 
     const google = createGoogleGenerativeAI({
-        apiKey: credential.value
+        apiKey: decrypt(credential.value)
     })
 
     try {
