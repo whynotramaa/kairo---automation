@@ -13,7 +13,8 @@ import {
     ChevronDownIcon,
     ChevronRightIcon,
     TerminalIcon,
-    WorkflowIcon
+    WorkflowIcon,
+    SparklesIcon
 } from "lucide-react"
 import { useExecutions } from "../hooks/use-executions"
 import { useState } from "react"
@@ -24,6 +25,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
+import { AIMarkdown } from "@/components/ai-markdown"
 
 const getStatusConfig = (status: ExecutionStatus) => {
     switch (status) {
@@ -233,13 +235,112 @@ export const ExecutionView = ({ executionId }: { executionId: string }) => {
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <div className="bg-muted/30 p-4 overflow-x-auto max-w-full">
-                            <pre className="text-sm font-mono text-foreground/80 whitespace-pre-wrap break-words">
-                                {JSON.stringify(execution.output, null, 2)}
-                            </pre>
-                        </div>
+                        <ExecutionOutput output={execution.output} />
                     </CardContent>
                 </Card>
+            )}
+        </div>
+    )
+}
+
+// Helper to check if a value looks like AI-generated markdown content
+const isAIMarkdownContent = (value: unknown): value is string => {
+    if (typeof value !== "string") return false
+    // Check if it contains markdown indicators
+    const markdownPatterns = [
+        /^#+ /m,           // Headers
+        /\*\*[^*]+\*\*/,   // Bold
+        /\*[^*]+\*/,       // Italic
+        /```[\s\S]*```/,   // Code blocks
+        /`[^`]+`/,         // Inline code
+        /^\s*[-*+] /m,     // Lists
+        /^\s*\d+\. /m,     // Numbered lists
+        /\[[^\]]+\]\([^)]+\)/, // Links
+    ]
+    return markdownPatterns.some(pattern => pattern.test(value))
+}
+
+// Helper to extract AI responses from output object
+const extractAIResponses = (output: Record<string, unknown>): { key: string; content: string }[] => {
+    const responses: { key: string; content: string }[] = []
+
+    for (const [key, value] of Object.entries(output)) {
+        if (typeof value === "string" && isAIMarkdownContent(value)) {
+            responses.push({ key, content: value })
+        } else if (typeof value === "object" && value !== null) {
+            // Check nested objects for text/content fields
+            const obj = value as Record<string, unknown>
+            if (typeof obj.text === "string" && isAIMarkdownContent(obj.text)) {
+                responses.push({ key, content: obj.text })
+            } else if (typeof obj.content === "string" && isAIMarkdownContent(obj.content)) {
+                responses.push({ key, content: obj.content })
+            } else if (typeof obj.response === "string" && isAIMarkdownContent(obj.response)) {
+                responses.push({ key, content: obj.response })
+            } else if (typeof obj.message === "string" && isAIMarkdownContent(obj.message)) {
+                responses.push({ key, content: obj.message })
+            }
+        }
+    }
+
+    return responses
+}
+
+// Get non-AI output (filter out AI responses for separate display)
+const getNonAIOutput = (output: Record<string, unknown>, aiKeys: string[]): Record<string, unknown> => {
+    const filtered: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(output)) {
+        if (!aiKeys.includes(key)) {
+            filtered[key] = value
+        }
+    }
+    return filtered
+}
+
+const ExecutionOutput = ({ output }: { output: Record<string, unknown> }) => {
+    const [showRawJson, setShowRawJson] = useState(false)
+    const aiResponses = extractAIResponses(output)
+    const aiKeys = aiResponses.map(r => r.key)
+    const nonAIOutput = getNonAIOutput(output, aiKeys)
+    const hasNonAIOutput = Object.keys(nonAIOutput).length > 0
+
+    return (
+        <div className="divide-y divide-muted/40">
+            {/* AI Responses rendered with Streamdown */}
+            {aiResponses.map(({ key, content }) => (
+                <div key={key} className="p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <SparklesIcon className="size-4 text-primary" />
+                        <span className="text-sm font-medium text-muted-foreground">{key}</span>
+                    </div>
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <AIMarkdown content={content} />
+                    </div>
+                </div>
+            ))}
+
+            {/* Non-AI output or raw JSON */}
+            {(hasNonAIOutput || aiResponses.length === 0) && (
+                <div className="p-4">
+                    {aiResponses.length > 0 && (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowRawJson(!showRawJson)}
+                            className="mb-3 gap-2 text-muted-foreground"
+                        >
+                            {showRawJson ? <ChevronDownIcon className="size-4" /> : <ChevronRightIcon className="size-4" />}
+                            {showRawJson ? "Hide" : "Show"} Raw Output
+                        </Button>
+                    )}
+
+                    {(showRawJson || aiResponses.length === 0) && (
+                        <div className="bg-muted/30 rounded-lg p-4 overflow-x-auto">
+                            <pre className="text-sm font-mono text-foreground/80 whitespace-pre-wrap wrap-break-word">
+                                {JSON.stringify(aiResponses.length === 0 ? output : nonAIOutput, null, 2)}
+                            </pre>
+                        </div>
+                    )}
+                </div>
             )}
         </div>
     )
