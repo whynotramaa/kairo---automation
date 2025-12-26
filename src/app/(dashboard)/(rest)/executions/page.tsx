@@ -24,9 +24,7 @@ const Page = async ({ searchParams }: PageProps) => {
             <HydrateClient>
                 <ErrorBoundary fallback={<ExecutionsError />}>
                     <Suspense fallback={<ExecutionsLoading />}>
-                        <p>
-                            <ExecutionsList />
-                        </p>
+                        <ExecutionsList />
                     </Suspense>
                 </ErrorBoundary>
             </HydrateClient>

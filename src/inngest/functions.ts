@@ -11,6 +11,7 @@ import { StripeTriggerChannel } from "./channels/stripe-trigger";
 import { geminiChannel } from "./channels/gemini";
 import { openaiChannel } from "./channels/openai";
 import { GroqChannel } from "./channels/groq";
+import { AnthropicChannel } from "./channels/anthropic";
 import { DiscordChannel } from "./channels/discord";
 import { SlackChannel } from "./channels/slack";
 
@@ -41,6 +42,7 @@ export const executeWorkflow = inngest.createFunction(
             geminiChannel(),
             openaiChannel(),
             GroqChannel(),
+            AnthropicChannel(),
             DiscordChannel(),
             SlackChannel(),
         ],

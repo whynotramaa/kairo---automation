@@ -37,7 +37,7 @@ export const ExecutionsList = () => {
         <EntityList
             items={executions.data.items}
             getKey={(execution) => execution.id}
-            renderItem={(credential) => <p>{<ExecutionsItem data={credential} />}</p>}
+            renderItem={(credential) => <ExecutionsItem data={credential} />}
             emptyView={<ExecutionsEmpty />}
         />)
 }

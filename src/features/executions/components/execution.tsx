@@ -225,7 +225,7 @@ export const ExecutionView = ({ executionId }: { executionId: string }) => {
 
             {/* Output Section */}
             {execution.output && (
-                <Card className="shadow-sm border-muted/40">
+                <Card className="shadow-sm border-muted/40 overflow-hidden">
                     <CardHeader className="border-b border-muted/40 bg-muted/10 pb-4">
                         <div className="flex items-center gap-2">
                             <TerminalIcon className="size-5 text-muted-foreground" />
@@ -233,8 +233,8 @@ export const ExecutionView = ({ executionId }: { executionId: string }) => {
                         </div>
                     </CardHeader>
                     <CardContent className="p-0">
-                        <div className="bg-muted/30 p-4 overflow-x-auto">
-                            <pre className="text-sm font-mono text-foreground/80">
+                        <div className="bg-muted/30 p-4 overflow-x-auto max-w-full">
+                            <pre className="text-sm font-mono text-foreground/80 whitespace-pre-wrap break-words">
                                 {JSON.stringify(execution.output, null, 2)}
                             </pre>
                         </div>
