@@ -8,6 +8,7 @@ import { generateText } from "ai";
 import { openaiChannel } from "@/inngest/channels/openai";
 import { GroqChannel } from "@/inngest/channels/groq";
 import prisma from "@/lib/db";
+import { decrypt } from "@/lib/encryption";
 
 
 
@@ -86,7 +87,7 @@ export const GroqExecutor: NodeExecutor<GroqData> = async ({ data, nodeId, userI
 
 
     const Groq = createGroq({
-        apiKey: credential.value
+        apiKey: decrypt(credential.value)
     })
 
     try {
