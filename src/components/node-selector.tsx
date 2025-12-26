@@ -3,12 +3,13 @@
 import { NodeType } from "@/generated/prisma"
 import { GlobeIcon, MousePointer2Icon } from "lucide-react";
 import Image from "next/image"
-import React, { useCallback } from "react"
+import React, { useCallback, useState, useEffect } from "react"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
 import { SelectSeparator } from "./ui/select";
 import { useReactFlow } from "@xyflow/react";
 import { toast } from "sonner";
 import { createId } from "@paralleldrive/cuid2"
+import { useTheme } from "next-themes"
 
 export type NodeTypeOption = {
     type: NodeType;
@@ -94,6 +95,22 @@ interface NodeSelectorProps {
 export function NodeSelector({ open, onOpenChange, children }: NodeSelectorProps) {
 
     const { setNodes, getNodes, screenToFlowPosition } = useReactFlow()
+    const { resolvedTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    const isDark = mounted && resolvedTheme === "dark"
+
+    // Get theme-aware icon for a node type
+    const getNodeIcon = (nodeType: NodeTypeOption): string | React.ComponentType<{ className?: string }> => {
+        if (nodeType.type === NodeType.OPENAI) {
+            return isDark ? "/logos/openai_dark.svg" : "/logos/openai.svg"
+        }
+        return nodeType.icon
+    }
 
     const handleNodeSelect = useCallback((selection: NodeTypeOption) => {
 
@@ -154,7 +171,7 @@ export function NodeSelector({ open, onOpenChange, children }: NodeSelectorProps
                 </SheetHeader>
                 <div>
                     {triggerNodes.map((nodeType) => {
-                        const Icon = nodeType.icon
+                        const Icon = getNodeIcon(nodeType)
                         return (
                             <div key={nodeType.type} className="w-full justify-start h-auto py-5 px-4 rounded-none cursor-pointer border-l-2 border-transparent hover:border-l-primary" onClick={() => handleNodeSelect(nodeType)}>
                                 <div className="flex items-center gap-6 w-full min-w-0 overflow-hidden">
@@ -188,7 +205,7 @@ export function NodeSelector({ open, onOpenChange, children }: NodeSelectorProps
 
                 <div>
                     {executionNodes.map((nodeType) => {
-                        const Icon = nodeType.icon
+                        const Icon = getNodeIcon(nodeType)
                         return (
                             <div key={nodeType.type} className="w-full justify-start h-auto py-5 px-4 rounded-none cursor-pointer border-l-2 border-transparent hover:border-l-primary" onClick={() => handleNodeSelect(nodeType)}>
                                 <div className="flex items-center gap-6 w-full min-w-0 overflow-hidden">

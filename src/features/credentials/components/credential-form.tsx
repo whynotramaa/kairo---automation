@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useTheme } from "next-themes"
+import { useState, useEffect } from "react"
 
 const formSchema = z.object({
     name: z.string().min(1, "Name is required !"),
@@ -62,6 +64,21 @@ export const CredentialsForm = ({ initialData }: CredentialFormProps) => {
     const updateCredential = useUpdateCredential()
 
     const { handleError, modal } = useUpgradeModal()
+    const { resolvedTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    const isDark = mounted && resolvedTheme === "dark"
+
+    const getCredentialLogo = (type: CredentialType) => {
+        if (type === CredentialType.OPENAI) {
+            return isDark ? "/logos/openai_dark.svg" : "/logos/openai.svg"
+        }
+        return credentialTypeOptions.find(opt => opt.value === type)?.logo || "/logos/gemini.svg"
+    }
 
     const isEdit = !!initialData?.id
 
@@ -135,7 +152,7 @@ export const CredentialsForm = ({ initialData }: CredentialFormProps) => {
                                                         <SelectValue>
                                                             {selectedOption && (
                                                                 <div className="flex items-center gap-2">
-                                                                    <Image src={selectedOption.logo} alt={selectedOption.label} width={16} height={16} />
+                                                                    <Image src={getCredentialLogo(selectedOption.value)} alt={selectedOption.label} width={16} height={16} />
                                                                     {selectedOption.label}
                                                                 </div>
                                                             )}
@@ -147,7 +164,7 @@ export const CredentialsForm = ({ initialData }: CredentialFormProps) => {
                                                     {credentialTypeOptions.map((option) => (
                                                         <SelectItem key={option.value} value={option.value}>
                                                             <div className="flex items-center gap-2">
-                                                                <Image src={option.logo} alt={option.label!} width={16} height={16} />
+                                                                <Image src={getCredentialLogo(option.value)} alt={option.label!} width={16} height={16} />
                                                                 {option.label}
                                                             </div>
                                                         </SelectItem>

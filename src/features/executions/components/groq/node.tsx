@@ -1,7 +1,7 @@
 "use client"
 
 import { Node, NodeProps, useReactFlow } from "@xyflow/react"
-import { memo, useState } from "react"
+import { memo, useState, useEffect } from "react"
 import { useTheme } from "next-themes"
 import { BaseExecNode } from "../base-execution-node"
 import { AVAILABLE_MODELS, GroqDialog, GroqFormValues } from "./dialog"
@@ -49,6 +49,11 @@ export const GroqNode = memo((props: NodeProps<GroqNodeType>) => {
     const { resolvedTheme } = useTheme()
 
     const [dialogOpen, setDialogOpen] = useState(false)
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     const nodeStatus = useNodeStatus({
         nodeId: props.id,
@@ -73,7 +78,7 @@ export const GroqNode = memo((props: NodeProps<GroqNodeType>) => {
         ? `${nodeData.model || AVAILABLE_MODELS[0]} : ${nodeData.userPrompt.slice(0, 49)}...`
         : "Not Configured"
 
-    const isDark = resolvedTheme === "dark"
+    const isDark = mounted && resolvedTheme === "dark"
     const modelIcon = getModelIcon(nodeData?.model, isDark)
 
     return (
