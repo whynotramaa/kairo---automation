@@ -137,7 +137,7 @@ export const SlackDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }
                                     <FormControl>
                                         <Textarea
                                             placeholder="Summary: {{prevNode.gemini.text}}"
-                                            className="min-h-[20px] font-mono te-sm" {...field} />
+                                            className="min-h-[20px] font-mono text-sm" {...field} />
                                     </FormControl>
                                     <FormDescription>
                                         The message to send on Slack. Use {"{{variables}}"} for simple values or {"{{JSON variable}}"} to stringify objects

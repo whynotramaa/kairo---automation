@@ -8,3 +8,9 @@
 ### Nodes
 
 - whatsapp and telegram nodes
+
+
+### MISC.
+
+- make a landing page and a docs page 
+- engineering page
