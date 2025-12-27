@@ -1,8 +1,9 @@
 import { generateSlug } from "random-word-slugs"
 import prisma from "@/lib/db"
-import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init"
+import { createTRPCRouter, protectedProcedure } from "@/trpc/init"
 import z, { string } from "zod"
-import { PAGINATION } from "@/config/constants"
+import { TRPCError } from "@trpc/server"
+import { FREE_TIER, PAGINATION } from "@/config/constants"
 import { NodeType } from "@/generated/prisma"
 import type { Node, Edge } from "@xyflow/react"
 import { inngest } from "@/inngest/client"
@@ -27,7 +28,19 @@ export const workflowsRouter = createTRPCRouter({
             return workflow
         }),
 
-    create: premiumProcedure.mutation(({ ctx }) => {
+    create: protectedProcedure.mutation(async ({ ctx }) => {
+        // Check if user has reached the free tier workflow limit
+        const workflowCount = await prisma.workflow.count({
+            where: { userId: ctx.auth.user.id }
+        })
+
+        if (workflowCount >= FREE_TIER.WORKFLOW_LIMIT) {
+            throw new TRPCError({
+                code: "FORBIDDEN",
+                message: "WORKFLOW_LIMIT_REACHED"
+            })
+        }
+
         return prisma.workflow.create({
             data: {
                 name: generateSlug(3),
