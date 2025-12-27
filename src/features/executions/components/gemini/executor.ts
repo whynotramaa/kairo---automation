@@ -35,21 +35,24 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({ data, nodeId, u
     }))
 
     if (!data.variableName || data.variableName.trim() === "") {
+        const errorMessage = "Gemini Node: Variable name is missing or empty!";
         await publish(
-            geminiChannel().status({ nodeId, status: "error" })
+            geminiChannel().status({ nodeId, status: "error", errorMessage })
         )
-        throw new NonRetriableError("Gemini Node: Variable name is missing or empty!")
+        throw new NonRetriableError(errorMessage)
     }
 
     if (!data.userPrompt) {
+        const errorMessage = "Gemini Node: User Prompt is missing !";
         await publish(
             geminiChannel().status({
                 nodeId,
                 status: "error",
+                errorMessage,
             })
         )
 
-        throw new NonRetriableError("Gemini Node: User Prompt is missing !")
+        throw new NonRetriableError(errorMessage)
 
     }
 
@@ -64,13 +67,15 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({ data, nodeId, u
     })
 
     if (!credential) {
+        const errorMessage = "Gemini Node: Credentials not found !";
         await publish(
             geminiChannel().status({
                 nodeId,
                 status: "error",
+                errorMessage,
             })
         )
-        throw new NonRetriableError("GEMINI Node: Credentials not found !")
+        throw new NonRetriableError(errorMessage)
     }
     const systemPrompt = data.systemPrompt
         ? Handlebars.compile(data.systemPrompt)(context)
@@ -118,9 +123,10 @@ export const GeminiExecutor: NodeExecutor<GeminiData> = async ({ data, nodeId, u
         }
 
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         await publish(
             geminiChannel().status({
-                nodeId, status: "error",
+                nodeId, status: "error", errorMessage,
             })
         )
         throw error

@@ -35,21 +35,24 @@ export const OpenAIExecutor: NodeExecutor<OpenAIData> = async ({ data, userId, n
     }))
 
     if (!data.variableName || data.variableName.trim() === "") {
+        const errorMessage = "OpenAI Node: Variable name is missing or empty!";
         await publish(
-            openaiChannel().status({ nodeId, status: "error" })
+            openaiChannel().status({ nodeId, status: "error", errorMessage })
         )
-        throw new NonRetriableError("OpenAI Node: Variable name is missing or empty!")
+        throw new NonRetriableError(errorMessage)
     }
 
     if (!data.userPrompt) {
+        const errorMessage = "OpenAI Node: User Prompt is missing !";
         await publish(
             openaiChannel().status({
                 nodeId,
                 status: "error",
+                errorMessage,
             })
         )
 
-        throw new NonRetriableError("OpenAI Node: User Prompt is missing !")
+        throw new NonRetriableError(errorMessage)
 
     }
 
@@ -64,13 +67,15 @@ export const OpenAIExecutor: NodeExecutor<OpenAIData> = async ({ data, userId, n
     })
 
     if (!credential) {
+        const errorMessage = "OpenAI Node: Credentials not found !";
         await publish(
             openaiChannel().status({
                 nodeId,
                 status: "error",
+                errorMessage,
             })
         )
-        throw new NonRetriableError("OPEN AI Node: Credentials not found !")
+        throw new NonRetriableError(errorMessage)
     }
     const systemPrompt = data.systemPrompt
         ? Handlebars.compile(data.systemPrompt)(context)
@@ -118,9 +123,10 @@ export const OpenAIExecutor: NodeExecutor<OpenAIData> = async ({ data, userId, n
         }
 
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         await publish(
             openaiChannel().status({
-                nodeId, status: "error",
+                nodeId, status: "error", errorMessage,
             })
         )
         throw error

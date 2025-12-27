@@ -31,8 +31,9 @@ export const SlackExecutor: NodeExecutor<SlackData> = async ({
     await publish(SlackChannel().status({ nodeId, status: "loading" }));
 
     if (!data.content) {
-        await publish(SlackChannel().status({ nodeId, status: "error" }));
-        throw new NonRetriableError("Slack Node: Content is missing !");
+        const errorMessage = "Slack Node: Content is missing !";
+        await publish(SlackChannel().status({ nodeId, status: "error", errorMessage }));
+        throw new NonRetriableError(errorMessage);
     }
 
     const rawContent = Handlebars.compile(data.content)(context);
@@ -41,8 +42,9 @@ export const SlackExecutor: NodeExecutor<SlackData> = async ({
 
     try {
         if (!data.webhookUrl) {
-            await publish(SlackChannel().status({ nodeId, status: "error" }));
-            throw new NonRetriableError("Slack Node: Webhook URL is missing !");
+            const errorMessage = "Slack Node: Webhook URL is missing !";
+            await publish(SlackChannel().status({ nodeId, status: "error", errorMessage }));
+            throw new NonRetriableError(errorMessage);
         }
 
         await step.run("slack-webhook", async () => {
@@ -54,10 +56,9 @@ export const SlackExecutor: NodeExecutor<SlackData> = async ({
         });
 
         if (!data.variableName || data.variableName.trim() === "") {
-            await publish(SlackChannel().status({ nodeId, status: "error" }));
-            throw new NonRetriableError(
-                "Slack Node: Variable name is missing or empty!"
-            );
+            const errorMessage = "Slack Node: Variable name is missing or empty!";
+            await publish(SlackChannel().status({ nodeId, status: "error", errorMessage }));
+            throw new NonRetriableError(errorMessage);
         }
 
         await publish(
@@ -72,7 +73,8 @@ export const SlackExecutor: NodeExecutor<SlackData> = async ({
         };
 
     } catch (error) {
-        await publish(SlackChannel().status({ nodeId, status: "error" }));
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        await publish(SlackChannel().status({ nodeId, status: "error", errorMessage }));
         throw error;
     }
 };

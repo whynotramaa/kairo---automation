@@ -32,8 +32,9 @@ export const DiscordExecutor: NodeExecutor<DiscordData> = async ({
     await publish(DiscordChannel().status({ nodeId, status: "loading" }));
 
     if (!data.content) {
-        await publish(DiscordChannel().status({ nodeId, status: "error" }));
-        throw new NonRetriableError("Discord Node: Content is missing !");
+        const errorMessage = "Discord Node: Content is missing !";
+        await publish(DiscordChannel().status({ nodeId, status: "error", errorMessage }));
+        throw new NonRetriableError(errorMessage);
     }
 
     const rawContent = Handlebars.compile(data.content)(context);
@@ -45,8 +46,9 @@ export const DiscordExecutor: NodeExecutor<DiscordData> = async ({
 
     try {
         if (!data.webhookUrl) {
-            await publish(DiscordChannel().status({ nodeId, status: "error" }));
-            throw new NonRetriableError("Discord Node: Webhook URL is missing !");
+            const errorMessage = "Discord Node: Webhook URL is missing !";
+            await publish(DiscordChannel().status({ nodeId, status: "error", errorMessage }));
+            throw new NonRetriableError(errorMessage);
         }
 
         await step.run("discord-webhook", async () => {
@@ -59,10 +61,9 @@ export const DiscordExecutor: NodeExecutor<DiscordData> = async ({
         });
 
         if (!data.variableName || data.variableName.trim() === "") {
-            await publish(DiscordChannel().status({ nodeId, status: "error" }));
-            throw new NonRetriableError(
-                "Discord Node: Variable name is missing or empty!"
-            );
+            const errorMessage = "Discord Node: Variable name is missing or empty!";
+            await publish(DiscordChannel().status({ nodeId, status: "error", errorMessage }));
+            throw new NonRetriableError(errorMessage);
         }
 
         await publish(
@@ -77,7 +78,8 @@ export const DiscordExecutor: NodeExecutor<DiscordData> = async ({
         };
 
     } catch (error) {
-        await publish(DiscordChannel().status({ nodeId, status: "error" }));
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
+        await publish(DiscordChannel().status({ nodeId, status: "error", errorMessage }));
         throw error;
     }
 };

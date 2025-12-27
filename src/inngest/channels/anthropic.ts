@@ -6,5 +6,8 @@ export const AnthropicChannel = channel(ANTHROPIC_CHANNEL_NAME).addTopic(
     topic("status").type<{
         nodeId: string,
         status: "loading" | "success" | "error"
+        errorMessage?: string
+        isRetrying?: boolean
+        retryAttempt?: number
     }>(),
 )

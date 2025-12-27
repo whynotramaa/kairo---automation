@@ -6,5 +6,8 @@ export const manualTriggerChannel = channel(MANUAL_TRIGGER_CHANNEL_NAME).addTopi
     topic("status").type<{
         nodeId: string,
         status: "loading" | "success" | "error"
+        errorMessage?: string
+        isRetrying?: boolean
+        retryAttempt?: number
     }>(),
 )

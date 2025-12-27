@@ -6,5 +6,8 @@ export const GoogleFormTriggerChannel = channel(GOOGLE_FORM_CHANNEL_NAME).addTop
     topic("status").type<{
         nodeId: string,
         status: "loading" | "success" | "error"
+        errorMessage?: string
+        isRetrying?: boolean
+        retryAttempt?: number
     }>(),
 )

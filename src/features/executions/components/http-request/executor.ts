@@ -31,31 +31,34 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({ data,
     try {
         const result = await step.run("HTTP-request", async () => {
             if (!data.endpoint) {
-
+                const errorMessage = "HTTP Request Node: No Endpoint Configured";
                 await publish(httpReqChannel().status({
                     nodeId,
-                    status: "error"
+                    status: "error",
+                    errorMessage
                 }))
 
-                throw new NonRetriableError("HTTP Request Node: No Endpoint Configured")
+                throw new NonRetriableError(errorMessage)
             }
             if (!data.variableName) {
-
+                const errorMessage = "HTTP Request Node: Variable Name Not Configured";
                 await publish(httpReqChannel().status({
                     nodeId,
-                    status: "error"
+                    status: "error",
+                    errorMessage
                 }))
 
-                throw new NonRetriableError("HTTP Request Node: Variable Name Not Configured")
+                throw new NonRetriableError(errorMessage)
             }
             if (!data.method) {
-
+                const errorMessage = "HTTP Request Node: Methods Not Configured";
                 await publish(httpReqChannel().status({
                     nodeId,
-                    status: "error"
+                    status: "error",
+                    errorMessage
                 }))
 
-                throw new NonRetriableError("HTTP Request Node: Methods Not Configured")
+                throw new NonRetriableError(errorMessage)
             }
 
             // Validate body JSON for POST, PUT, PATCH methods before execution
@@ -66,11 +69,13 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({ data,
                     const resolved = Handlebars.compile(data.body)(context)
                     JSON.parse(resolved)
                 } catch {
+                    const errorMessage = "HTTP Request Node: Body must be valid JSON";
                     await publish(httpReqChannel().status({
                         nodeId,
-                        status: "error"
+                        status: "error",
+                        errorMessage
                     }))
-                    throw new NonRetriableError("HTTP Request Node: Body must be valid JSON")
+                    throw new NonRetriableError(errorMessage)
                 }
             }
             const method = data.method
@@ -122,9 +127,11 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({ data,
     }
 
     catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         await publish(httpReqChannel().status({
             nodeId,
-            status: "error"
+            status: "error",
+            errorMessage
         }))
 
         throw error

@@ -36,23 +36,26 @@ export const GroqExecutor: NodeExecutor<GroqData> = async ({ data, nodeId, userI
     }))
 
     if (!data.variableName || data.variableName.trim() === "") {
+        const errorMessage = "Groq Node: Variable name is missing or empty!";
         await publish(
-            GroqChannel().status({ nodeId, status: "error" })
+            GroqChannel().status({ nodeId, status: "error", errorMessage })
         )
-        throw new NonRetriableError("Groq Node: Variable name is missing or empty!")
+        throw new NonRetriableError(errorMessage)
     }
 
 
 
     if (!data.userPrompt) {
+        const errorMessage = "Groq Node: User Prompt is missing !";
         await publish(
             GroqChannel().status({
                 nodeId,
                 status: "error",
+                errorMessage,
             })
         )
 
-        throw new NonRetriableError("Groq Node: User Prompt is missing !")
+        throw new NonRetriableError(errorMessage)
 
     }
 
@@ -66,13 +69,15 @@ export const GroqExecutor: NodeExecutor<GroqData> = async ({ data, nodeId, userI
     })
 
     if (!credential) {
+        const errorMessage = "Groq Node: Credentials not found !";
         await publish(
             GroqChannel().status({
                 nodeId,
                 status: "error",
+                errorMessage,
             })
         )
-        throw new NonRetriableError("Groq Node: Credentials not found !")
+        throw new NonRetriableError(errorMessage)
     }
 
 
@@ -122,9 +127,10 @@ export const GroqExecutor: NodeExecutor<GroqData> = async ({ data, nodeId, userI
         }
 
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         await publish(
             GroqChannel().status({
-                nodeId, status: "error",
+                nodeId, status: "error", errorMessage,
             })
         )
         throw error

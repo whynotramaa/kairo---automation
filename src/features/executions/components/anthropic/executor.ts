@@ -34,23 +34,26 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({ data, nod
     }))
 
     if (!data.variableName || data.variableName.trim() === "") {
+        const errorMessage = "Anthropic Node: Variable name is missing or empty!";
         await publish(
-            AnthropicChannel().status({ nodeId, status: "error" })
+            AnthropicChannel().status({ nodeId, status: "error", errorMessage })
         )
-        throw new NonRetriableError("Anthropic Node: Variable name is missing or empty!")
+        throw new NonRetriableError(errorMessage)
     }
 
 
 
     if (!data.userPrompt) {
+        const errorMessage = "Anthropic Node: User Prompt is missing !";
         await publish(
             AnthropicChannel().status({
                 nodeId,
                 status: "error",
+                errorMessage,
             })
         )
 
-        throw new NonRetriableError("Anthropic Node: User Prompt is missing !")
+        throw new NonRetriableError(errorMessage)
 
     }
 
@@ -63,7 +66,15 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({ data, nod
     })
 
     if (!credential) {
-        throw new NonRetriableError("Anthropic Node: Credentials not found !")
+        const errorMessage = "Anthropic Node: Credentials not found !";
+        await publish(
+            AnthropicChannel().status({
+                nodeId,
+                status: "error",
+                errorMessage,
+            })
+        )
+        throw new NonRetriableError(errorMessage)
     }
 
 
@@ -113,9 +124,10 @@ export const AnthropicExecutor: NodeExecutor<AnthropicData> = async ({ data, nod
         }
 
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred";
         await publish(
             AnthropicChannel().status({
-                nodeId, status: "error",
+                nodeId, status: "error", errorMessage,
             })
         )
         throw error
