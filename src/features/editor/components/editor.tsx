@@ -25,6 +25,7 @@ import { useSetAtom } from "jotai";
 import { editorAtom } from "../store/atoms";
 import { NodeType } from "@/generated/prisma";
 import { ExecuteWorkflowBtn } from "./execute-workflow-button";
+import { useWorkflowRetry } from "@/features/executions/hooks/use-workflow-retry";
 
 export const EditorLoading = () => {
     return <LoadingView message="Loading Editor" />
@@ -41,6 +42,7 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
 
     const { data: workflow, isLoading, error } = useWorkflow(workflowId)
     const { resolvedTheme } = useTheme()
+    const { RetryDialogComponent } = useWorkflowRetry({ workflowId })
 
     const colorMode: ColorMode = useMemo(
         () => (resolvedTheme === "dark" ? "dark" : "light"),
@@ -89,6 +91,7 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
 
     return (
         <div className="h-full w-full overflow-hidden">
+            {RetryDialogComponent}
             <ReactFlow
                 nodes={nodes}
                 edges={edges}

@@ -173,6 +173,7 @@ enum ExecutionStatus {
   RUNNING
   SUCCESS
   FAILED
+  CANCELLED
 }
 
 model Execution {

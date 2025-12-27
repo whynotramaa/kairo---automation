@@ -107,6 +107,8 @@ const getStatusIcon = (status: ExecutionStatus) => {
             return <XCircleIcon className="size-5 text-red-600" />
         case ExecutionStatus.RUNNING:
             return <Loader2Icon className="size-5 text-blue-600 animate-spin" />
+        case ExecutionStatus.CANCELLED:
+            return <XCircleIcon className="size-5 text-amber-600" />
         default:
             return <Clock8Icon className="size-5 text-muted-foreground" />
     }

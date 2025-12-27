@@ -14,13 +14,14 @@ import { GroqChannel } from "./channels/groq";
 import { AnthropicChannel } from "./channels/anthropic";
 import { DiscordChannel } from "./channels/discord";
 import { SlackChannel } from "./channels/slack";
+import { workflowChannel } from "./channels/workflow";
 
-
+const MAX_RETRIES = process.env.NODE_ENV === "production" ? 3 : 0;
 
 export const executeWorkflow = inngest.createFunction(
     {
         id: "execute-workflow",
-        retries: process.env.NODE_ENV === "production" ? 3 : 0,
+        retries: MAX_RETRIES,
         onFailure: async ({ event, step }) => {
             return prisma.execution.update({
                 where: { inngestEventId: event.data.event.id },
@@ -45,9 +46,10 @@ export const executeWorkflow = inngest.createFunction(
             AnthropicChannel(),
             DiscordChannel(),
             SlackChannel(),
+            workflowChannel(),
         ],
     },
-    async ({ event, step, publish }) => {
+    async ({ event, step, publish, attempt }) => {
 
         const inngestEventId = event.id!;
 
@@ -56,6 +58,16 @@ export const executeWorkflow = inngest.createFunction(
             throw new NonRetriableError("Event ID or workflow id is missing !")
         }
 
+        // Publish retry notification if this is a retry attempt
+        if (attempt > 0) {
+            await publish(workflowChannel().retry({
+                workflowId,
+                inngestEventId,
+                attempt,
+                maxRetries: MAX_RETRIES,
+                errorMessage: "Retrying workflow execution...",
+            }))
+        }
 
         await step.run("create-execution", async () => {
             return prisma.execution.create({
@@ -101,6 +113,9 @@ export const executeWorkflow = inngest.createFunction(
                 context,
                 step,
                 publish,
+                attempt,
+                workflowId,
+                inngestEventId,
             })
         }
 

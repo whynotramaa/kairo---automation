@@ -49,6 +49,13 @@ const getStatusConfig = (status: ExecutionStatus) => {
                 variant: "secondary" as const,
                 className: "text-blue-600"
             }
+        case ExecutionStatus.CANCELLED:
+            return {
+                icon: XCircleIcon,
+                label: "Cancelled",
+                variant: "secondary" as const,
+                className: "bg-amber-600 hover:bg-amber-700 border-transparent text-white"
+            }
         default:
             return {
                 icon: Clock8Icon,
