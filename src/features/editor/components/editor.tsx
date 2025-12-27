@@ -42,7 +42,9 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
 
     const { data: workflow, isLoading, error } = useWorkflow(workflowId)
     const { resolvedTheme } = useTheme()
-    const { RetryDialogComponent } = useWorkflowRetry({ workflowId })
+
+    // Subscribe to workflow retry events (shows toasts on retry)
+    useWorkflowRetry({ workflowId })
 
     const colorMode: ColorMode = useMemo(
         () => (resolvedTheme === "dark" ? "dark" : "light"),
@@ -91,7 +93,6 @@ export const Editor = ({ workflowId }: { workflowId: string }) => {
 
     return (
         <div className="h-full w-full overflow-hidden">
-            {RetryDialogComponent}
             <ReactFlow
                 nodes={nodes}
                 edges={edges}

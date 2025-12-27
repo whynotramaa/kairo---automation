@@ -1,37 +1,26 @@
 "use client"
 
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useEffect, useRef } from "react"
 import { useInngestSubscription } from "@inngest/realtime/hooks"
 import { WORKFLOW_CHANNEL_NAME } from "@/inngest/channels/workflow"
 import { fetchWorkflowRealtimeToken } from "@/features/executions/actions/workflow-actions"
-import { RetryDialog, RetryInfo } from "@/features/executions/components/retry-dialog"
-import { useTRPC } from "@/trpc/client"
-import { useMutation } from "@tanstack/react-query"
 import { toast } from "sonner"
+
+interface RetryInfo {
+    workflowId: string
+    inngestEventId: string
+    attempt: number
+    maxRetries: number
+    errorMessage?: string
+    nodeName?: string
+}
 
 interface UseWorkflowRetryOptions {
     workflowId: string
 }
 
 export function useWorkflowRetry({ workflowId }: UseWorkflowRetryOptions) {
-    const [retryInfo, setRetryInfo] = useState<RetryInfo | null>(null)
-    const [dialogOpen, setDialogOpen] = useState(false)
     const lastProcessedAttemptRef = useRef<string | null>(null)
-
-    const trpc = useTRPC()
-
-    const cancelMutation = useMutation(
-        trpc.executions.cancel.mutationOptions({
-            onSuccess: () => {
-                toast.success("Workflow execution cancelled")
-                setDialogOpen(false)
-                setRetryInfo(null)
-            },
-            onError: (error) => {
-                toast.error(`Failed to cancel: ${error.message}`)
-            }
-        })
-    )
 
     const { data } = useInngestSubscription({
         refreshToken: fetchWorkflowRealtimeToken,
@@ -59,62 +48,32 @@ export function useWorkflowRetry({ workflowId }: UseWorkflowRetryOptions) {
 
         if (latestRetry?.kind === "data") {
             const msgData = latestRetry.data as RetryInfo
-            
+
             // Create a unique key for this retry attempt
             const attemptKey = `${msgData.inngestEventId}-${msgData.attempt}`
-            
-            // Only show dialog if this is a new retry we haven't processed
+
+            // Only show toast if this is a new retry we haven't processed
             if (lastProcessedAttemptRef.current !== attemptKey) {
                 lastProcessedAttemptRef.current = attemptKey
-                setRetryInfo(msgData)
-                setDialogOpen(true)
+
+                const attemptsRemaining = msgData.maxRetries - msgData.attempt
+
+                toast.warning(
+                    `Retrying workflow (Attempt ${msgData.attempt} of ${msgData.maxRetries})`,
+                    {
+                        description: msgData.errorMessage || "An error occurred, retrying automatically...",
+                        duration: 5000,
+                    }
+                )
+
+                // Show additional info if this is the final attempt
+                if (attemptsRemaining === 0) {
+                    toast.error("Final retry attempt", {
+                        description: "This is the last retry before the workflow fails.",
+                        duration: 7000,
+                    })
+                }
             }
         }
-
-        // Check for cancelled messages
-        const cancelledMessages = data.filter(
-            (msg) =>
-                msg.kind === "data" &&
-                msg.channel === WORKFLOW_CHANNEL_NAME &&
-                msg.topic === "cancelled" &&
-                msg.data.workflowId === workflowId
-        )
-
-        if (cancelledMessages.length > 0) {
-            setDialogOpen(false)
-            setRetryInfo(null)
-        }
     }, [data, workflowId])
-
-    const handleCancel = useCallback(() => {
-        if (!retryInfo) return
-
-        cancelMutation.mutate({
-            inngestEventId: retryInfo.inngestEventId,
-            workflowId: retryInfo.workflowId,
-        })
-    }, [retryInfo, cancelMutation])
-
-    const handleContinue = useCallback(() => {
-        setDialogOpen(false)
-        // Keep retryInfo so we can track if same attempt happens again
-    }, [])
-
-    const RetryDialogComponent = (
-        <RetryDialog
-            open={dialogOpen}
-            onOpenChange={setDialogOpen}
-            retryInfo={retryInfo}
-            onCancel={handleCancel}
-            onContinue={handleContinue}
-            isCancelling={cancelMutation.isPending}
-        />
-    )
-
-    return {
-        retryInfo,
-        dialogOpen,
-        setDialogOpen,
-        RetryDialogComponent,
-    }
 }
