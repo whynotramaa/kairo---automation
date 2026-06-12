@@ -11,6 +11,8 @@ import { GroqNode } from "@/features/executions/components/groq/node"
 import { AnthropicNode } from "@/features/executions/components/anthropic/node"
 import { DiscordNode } from "@/features/executions/components/discord/node"
 import { SlackNode } from "@/features/executions/components/slack/node"
+import { OpenRouterNode } from "@/features/executions/components/openrouter/node"
+import { OpenCodeNode } from "@/features/executions/components/opencode/node"
 
 export const nodeComponents = {
     [NodeType.INITIAL]: InitialNode,
@@ -24,6 +26,8 @@ export const nodeComponents = {
     [NodeType.ANTHROPIC]: AnthropicNode,
     [NodeType.DISCORD]: DiscordNode,
     [NodeType.SLACK]: SlackNode,
+    [NodeType.OPENROUTER]: OpenRouterNode,
+    [NodeType.OPENCODE]: OpenCodeNode,
 
 } as const satisfies NodeTypes
 

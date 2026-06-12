@@ -12,6 +12,7 @@ import Image from "next/image";
 import { CredentialsForm } from "./credential-form";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 
 export const CredentialsSearch = () => {
@@ -55,9 +56,10 @@ export const CredentialsList = () => {
 
     return (
         <EntityList
+            grid
             items={credentials.data.items}
             getKey={(credential) => credential.id}
-            renderItem={(credential) => <p>{<CredentialsItem data={credential} />}</p>}
+            renderItem={(credential) => <CredentialsItem data={credential} />}
             emptyView={<CredentialsEmpty />}
         />)
 }
@@ -133,6 +135,8 @@ const credentialLogos: Record<CredentialType, string> = {
     [CredentialType.OPENAI]: "/logos/openai.svg",
     [CredentialType.GROQ]: "/logos/groq.svg",
     [CredentialType.ANTHROPIC]: "/logos/claude-ai-icon.svg",
+    [CredentialType.OPENROUTER]: "/logos/openrouter.svg",
+    [CredentialType.OPENCODE]: "/logos/opencode.svg",
 }
 
 const getCredentialLogo = (type: CredentialType, isDark: boolean): string => {
@@ -140,6 +144,24 @@ const getCredentialLogo = (type: CredentialType, isDark: boolean): string => {
         return isDark ? "/logos/openai_dark.svg" : "/logos/openai.svg"
     }
     return credentialLogos[type] || "/logos/gemini.svg"
+}
+
+const providerLabels: Record<CredentialType, string> = {
+    [CredentialType.GEMINI]: "Gemini",
+    [CredentialType.OPENAI]: "OpenAI",
+    [CredentialType.GROQ]: "Groq",
+    [CredentialType.ANTHROPIC]: "Anthropic",
+    [CredentialType.OPENROUTER]: "OpenRouter",
+    [CredentialType.OPENCODE]: "OpenCode",
+}
+
+const badgeColors: Record<CredentialType, string> = {
+    [CredentialType.GEMINI]: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+    [CredentialType.OPENAI]: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    [CredentialType.GROQ]: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
+    [CredentialType.ANTHROPIC]: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+    [CredentialType.OPENROUTER]: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20",
+    [CredentialType.OPENCODE]: "bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20",
 }
 
 export const CredentialsItem = ({
@@ -159,7 +181,6 @@ export const CredentialsItem = ({
 
     const handleRemove = () => {
         removeCredentials.mutate({ id: data.id })
-
     }
 
     const logo = getCredentialLogo(data.type, isDark)
@@ -171,17 +192,25 @@ export const CredentialsItem = ({
     return (
         <EntityItem
             href={`/credentials/${data.id}`}
-            title={data.name}
+            title={
+                <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+                    <span className="truncate font-semibold text-sm max-w-[110px] md:max-w-[140px]">{data.name}</span>
+                    <span className={cn(
+                        "px-1.5 py-0.5 rounded-full text-[9px] font-bold tracking-wide border uppercase shrink-0",
+                        badgeColors[data.type]
+                    )}>
+                        {providerLabels[data.type]}
+                    </span>
+                </div>
+            }
             subtitle={
                 <>
-                    Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })} {" "}
-                    &bull; Created {formatDistanceToNow(data.createdAt, { addSuffix: true })} {" "}
-
+                    Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
                 </>
             }
             image={
-                <div className="size-8 flex items-center justify-center">
-                    <Image src={logo} alt={data.type} width={20} height={20} />
+                <div className="size-6 flex items-center justify-center shrink-0">
+                    <Image src={logo} alt={data.type} width={18} height={18} className="object-contain" />
                 </div>
             }
             onRemove={handleRemove}

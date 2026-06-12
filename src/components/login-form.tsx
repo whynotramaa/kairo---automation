@@ -140,8 +140,8 @@ export function LoginForm() {
                                             </FormItem>
                                         )} />
 
-                                    <Button type="submit" className="w-full cursor-pointer" disabled={isPending}>
-                                        {isPending ? (<Loader className="mr-2 h-4 w-4 animate-spin" />) : "Login"}
+                                    <Button type="submit" className="w-full cursor-pointer" isLoading={isPending}>
+                                        Login
                                     </Button>
 
                                     <div className="text-center text-sm">

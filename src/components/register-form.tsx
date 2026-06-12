@@ -164,8 +164,8 @@ export function RegisterForm() {
                                             </FormItem>
                                         )} />
 
-                                    <Button type="submit" className="w-full" disabled={isPending}>
-                                        {isPending ? (<Loader2 className="mr-2 h-4 w-4 animate-spin" />) : ("Create an account")}
+                                    <Button type="submit" className="w-full" isLoading={isPending}>
+                                        Create an account
 
                                     </Button>
 

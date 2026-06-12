@@ -10,26 +10,45 @@ import { useCredentialsByType } from "@/features/credentials/hooks/use-credentia
 import { CredentialType } from "@/generated/prisma";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
-import { useTheme } from "next-themes";
 
-
-
-export const AVAILABLE_MODELS = [
+export const OPENCODE_MODELS = [
+    // Free models
+    "grok-build-0.1",
+    "big-pickle",
+    "deepseek-v4-flash-free",
+    "mimo-v2.5-free",
+    "north-mini-code-free",
+    "nemotron-3-ultra-free",
+    "qwen3.6-plus-free",
+    "minimax-m3-free",
+    // Paid models
+    "deepseek-v4-pro",
+    "deepseek-v4-flash",
+    "kimi-k2.6",
+    "kimi-k2.5",
+    "qwen3.6-plus",
+    "qwen3.5-plus",
+    "glm-5.1",
+    "glm-5",
+    "minimax-m2.7",
+    "minimax-m2.5",
+    // GPT via OpenCode
     "gpt-5.5",
     "gpt-5.5-pro",
     "gpt-5.4",
-    "gpt-5.4-pro",
     "gpt-5.4-mini",
     "gpt-5.4-nano",
-    "gpt-5.3-codex",
-    "gpt-5.2",
-    "gpt-5.1",
-    "gpt-5",
+    // Claude via OpenCode
+    "claude-sonnet-4-6",
+    "claude-opus-4-8",
+    "claude-haiku-4-5",
+    // Gemini via OpenCode
+    "gemini-3.5-flash",
+    "gemini-3.1-pro",
 ] as const
-
 
 const formSchema = z.object({
     variableName: z.string().min(1, { message: "Variable name is required" }).regex(/^[A-Za-z_$][A-Za-z0-9_$]*$/, { message: "Variable name must start with letter or underscore and must not contain other special chars" }),
@@ -39,55 +58,44 @@ const formSchema = z.object({
     userPrompt: z.string().min(1, "User prompt is required"),
 })
 
-export type OpenAIFormValues = z.infer<typeof formSchema>
+export type OpenCodeFormValues = z.infer<typeof formSchema>
 
-interface OpenAIProps {
-    open: boolean,
-    onOpenChange: (open: boolean) => void;
-    onSubmit: (values: z.infer<typeof formSchema>) => void;
-    defaultValues?: Partial<OpenAIFormValues>
+interface OpenCodeProps {
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    onSubmit: (values: OpenCodeFormValues) => void
+    defaultValues?: Partial<OpenCodeFormValues>
 }
 
-export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }: OpenAIProps) => {
+export const OpenCodeDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} }: OpenCodeProps) => {
+    const { data: credentials, isLoading: isLoadingCredentials } = useCredentialsByType(CredentialType.OPENCODE)
 
-    const { data: credentials, isLoading: isLoadingCredentials } = useCredentialsByType(CredentialType.OPENAI)
-    const { resolvedTheme } = useTheme()
-    const [mounted, setMounted] = useState(false)
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
-
-    const isDark = mounted && resolvedTheme === "dark"
-    const openaiIcon = isDark ? "/logos/openai_dark.svg" : "/logos/openai.svg"
-
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<OpenCodeFormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            variableName: defaultValues.variableName || "openAI",
+            variableName: defaultValues.variableName || "openCode",
             credentialId: defaultValues.credentialId || "",
-            model: defaultValues.model || AVAILABLE_MODELS[0],
+            model: defaultValues.model || OPENCODE_MODELS[0],
             systemPrompt: defaultValues.systemPrompt || "",
             userPrompt: defaultValues.userPrompt || ""
         }
     })
 
-    // reset to defaults
     useEffect(() => {
         if (open) {
             form.reset({
-                variableName: defaultValues.variableName || "OpenAI",
+                variableName: defaultValues.variableName || "openCode",
                 credentialId: defaultValues.credentialId || "",
-                model: defaultValues.model || AVAILABLE_MODELS[0],
+                model: defaultValues.model || OPENCODE_MODELS[0],
                 systemPrompt: defaultValues.systemPrompt || "",
                 userPrompt: defaultValues.userPrompt || ""
             })
         }
     }, [open, defaultValues, form])
 
-    const watchVarName = form.watch("variableName") || "OpenAI"
+    const watchVarName = form.watch("variableName") || "openCode"
 
-    const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    const handleSubmit = (values: OpenCodeFormValues) => {
         onSubmit(values)
         onOpenChange(false)
     }
@@ -96,9 +104,9 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
         <Dialog open={open} onOpenChange={onOpenChange} modal={false}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>OpenAI</DialogTitle>
+                    <DialogTitle>OpenCode (Zen)</DialogTitle>
                     <DialogDescription>
-                        Configure AI models and prompt for OpenAI .
+                        Generate code and text using OpenCode Zen models.
                     </DialogDescription>
                 </DialogHeader>
                 <FormProvider {...form}>
@@ -108,23 +116,18 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                             name="variableName"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>AI Node Name</FormLabel>
-
+                                    <FormLabel>Node Name</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="OpenAI-node" {...field} />
+                                        <Input placeholder="opencode-node" {...field} />
                                     </FormControl>
                                     <FormDescription>
-                                        Use this name to reference the result in other nodes. {" "}
-                                        {`{{${watchVarName}.text}}`}
+                                        Use this name to reference the result in other nodes.{" "}
+                                        {`{{${watchVarName}.aiResponse}}`}
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-
-                        {/* ---------------- */}
-
-                        {/* ---------------- */}
 
                         <FormField
                             control={form.control}
@@ -138,8 +141,7 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                                         : "No credentials found"
                                 return (
                                     <FormItem>
-                                        <FormLabel>OpenAI Credential</FormLabel>
-
+                                        <FormLabel>OpenCode Credential</FormLabel>
                                         <Select
                                             onValueChange={field.onChange}
                                             value={field.value || ""}
@@ -150,7 +152,7 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                                                     <SelectValue>
                                                         {selectedCredential ? (
                                                             <div className="flex items-center gap-2">
-                                                                <Image src={openaiIcon} alt={selectedCredential.name} width={16} height={16} />
+                                                                <Image src="/logos/opencode.svg" alt={selectedCredential.name} width={16} height={16} />
                                                                 {selectedCredential.name}
                                                             </div>
                                                         ) : (
@@ -159,18 +161,16 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                                                     </SelectValue>
                                                 </SelectTrigger>
                                             </FormControl>
-
                                             <SelectContent>
                                                 {credentials?.map((credential) => (
                                                     <SelectItem key={credential.id} value={credential.id}>
                                                         <div className="flex items-center gap-2">
-                                                            <Image src={openaiIcon} alt={credential.name} width={16} height={16} />
+                                                            <Image src="/logos/opencode.svg" alt={credential.name} width={16} height={16} />
                                                             {credential.name}
                                                         </div>
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
-
                                         </Select>
                                         <FormMessage />
                                     </FormItem>
@@ -178,46 +178,32 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                             }}
                         />
 
-                        {/* ------------------ */}
                         <FormField
                             control={form.control}
                             name="model"
-                            render={({ field }) => {
-                                const selectedModel = AVAILABLE_MODELS.find(m => m === field.value)
-                                return (
-                                    <FormItem>
-                                        <FormLabel>Model</FormLabel>
-
-                                        <Select
-                                            onValueChange={field.onChange}
-                                            value={field.value}
-                                        >
-                                            <FormControl>
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue>
-                                                        {selectedModel || <span className="text-muted-foreground">Select a model</span>}
-                                                    </SelectValue>
-                                                </SelectTrigger>
-                                            </FormControl>
-
-                                            <SelectContent>
-                                                {AVAILABLE_MODELS.map((model) => (
-                                                    <SelectItem key={model} value={model}>
-                                                        {model}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )
-                            }}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Model</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value}>
+                                        <FormControl>
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue>
+                                                    {field.value || <span className="text-muted-foreground">Select a model</span>}
+                                                </SelectValue>
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {OPENCODE_MODELS.map((model) => (
+                                                <SelectItem key={model} value={model}>
+                                                    {model}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
                         />
-
-                        {/* ------------------ */}
-
-                        {/* ------------------ */}
 
                         <FormField
                             control={form.control}
@@ -226,14 +212,12 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                                 <FormItem>
                                     <FormLabel>System Prompt (Optional)</FormLabel>
                                     <FormControl>
-                                        <Textarea className="min-h-[20px] font-mono te-sm" placeholder="Act as Harvey Specter ... " {...field} />
+                                        <Textarea className="min-h-[20px] font-mono text-sm" placeholder="You are an expert software engineer..." {...field} />
                                     </FormControl>
-
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        {/* ------------------ */}
 
                         <FormField
                             control={form.control}
@@ -242,11 +226,10 @@ export const OpenAIDialog = ({ open, onOpenChange, onSubmit, defaultValues = {} 
                                 <FormItem>
                                     <FormLabel>User Prompt</FormLabel>
                                     <FormControl>
-                                        <Textarea className="min-h-[80px] font-mono te-sm" placeholder="Summarize the whatsapp conversation with {{httpResponse.whatsapp.user[0]}}" {...field} />
+                                        <Textarea className="min-h-[80px] font-mono text-sm" placeholder="Write a function that {{httpResponse.description}}" {...field} />
                                     </FormControl>
-
                                     <FormDescription>
-                                        The prompt to send to AI. Use {"{{variables}}"} for simple values or {"{{JSON variable}}"} to stringify objects
+                                        Use {"{{variables}}"} for simple values or {"{{json variable}}"} to stringify objects
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>

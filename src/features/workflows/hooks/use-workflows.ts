@@ -135,7 +135,26 @@ export const useUpdateWorkflow = () => {
 
 }
 
-// hook to execute workflow 
+// hook to import workflow from JSON
+
+export const useImportWorkflow = () => {
+    const queryClient = useQueryClient()
+    const trpc = useTRPC()
+
+    return useMutation(trpc.workflow.importFromJson.mutationOptions({
+        onSuccess: (data) => {
+            toast.success(`Workflow "${data.name}" imported!`)
+            queryClient.invalidateQueries(
+                trpc.workflow.getmany.queryOptions({})
+            )
+        },
+        onError: (error) => {
+            toast.error(`Failed to import workflow: ${error.message}`)
+        }
+    }))
+}
+
+// hook to execute workflow
 
 export const useExecuteWorkflow = () => {
     const trpc = useTRPC()

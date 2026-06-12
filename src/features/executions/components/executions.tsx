@@ -114,16 +114,13 @@ const getStatusIcon = (status: ExecutionStatus) => {
     }
 }
 
-
 const formatStatus = (status: ExecutionStatus) => {
     return status.charAt(0) + status.slice(1).toLowerCase()
 }
 
-
 export const ExecutionsItem = ({
     data
 }: { data: Execution & { workflow: { id: string; name: string; } } }) => {
-
     const duration = data.completedAt
         ? Math.round(
             (new Date(data.completedAt).getTime() - new Date(data.startedAt).getTime()) / 1000
@@ -132,9 +129,9 @@ export const ExecutionsItem = ({
 
     const subtitle = (
         <>
-            {data.workflow.name} &bull; Started {" "}
+            {data.workflow.name} &bull; Started{" "}
             {formatDistanceToNow(data.startedAt, { addSuffix: true })}
-            {duration !== null && <> &bull; Took {duration}s </>}
+            {duration !== null && <> &bull; Took {duration}s</>}
         </>
     )
 

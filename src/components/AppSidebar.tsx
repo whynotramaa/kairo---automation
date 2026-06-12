@@ -12,7 +12,7 @@ import {
 } from "lucide-react"
 
 import Image from "next/image"
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "./ui/sidebar";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { useHasActiveSubscription } from "@/features/subscriptions/hooks/use-subscription";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { toggleThemeWithTransition } from "@/lib/theme-transition";
 
 
 const menuItems = [{
@@ -52,6 +53,7 @@ export const AppSidebar = () => {
     const pathname = usePathname()
     const { hasActiveSubscription, isLoading } = useHasActiveSubscription()
     const { resolvedTheme, setTheme } = useTheme()
+    const { state } = useSidebar()
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -115,15 +117,41 @@ export const AppSidebar = () => {
                 <SidebarMenuItem>
                     <SidebarMenuButton
                         tooltip={isDark ? "Light Mode" : "Dark Mode"}
-                        className="gap-x-4 cursor-pointer h-10 px-4"
-                        onClick={() => setTheme(isDark ? "light" : "dark")}
+                        className="gap-x-4 cursor-pointer h-10 px-4 w-full flex items-center justify-between group/theme-btn"
+                        onClick={(e) =>
+                            toggleThemeWithTransition(
+                                () => setTheme(isDark ? "light" : "dark"),
+                                e,
+                            )
+                        }
                     >
-                        {mounted && isDark ? (
-                            <MoonIcon className="h-4 w-4" />
-                        ) : (
-                            <SunIcon className="h-4 w-4" />
+                        <div className="flex items-center gap-x-4">
+                            {mounted && isDark ? (
+                                <MoonIcon className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover/theme-btn:rotate-12 group-hover/theme-btn:scale-110" />
+                            ) : (
+                                <SunIcon className="h-4 w-4 text-muted-foreground transition-transform duration-300 group-hover/theme-btn:rotate-45 group-hover/theme-btn:scale-110" />
+                            )}
+                            <span>Dark Mode</span>
+                        </div>
+                        {mounted && state === "expanded" && (
+                            <div
+                                className="relative inline-flex h-5 w-9 shrink-0 items-center rounded-full border border-border/70 bg-muted transition-colors duration-300 group-hover/theme-btn:border-border"
+                            >
+                                <span
+                                    className={`pointer-events-none flex h-3.5 w-3.5 items-center justify-center rounded-full bg-card shadow-xs transition-all duration-500 transform-gpu [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] ${
+                                        isDark
+                                            ? "translate-x-[18px] rotate-[360deg]"
+                                            : "translate-x-0.5 rotate-0"
+                                    } group-hover/theme-btn:scale-110 group-active/theme-btn:scale-90`}
+                                >
+                                    {isDark ? (
+                                        <MoonIcon className="size-2 fill-yellow-400/10 text-yellow-400" />
+                                    ) : (
+                                        <SunIcon className="size-2 fill-amber-500/10 text-amber-500" />
+                                    )}
+                                </span>
+                            </div>
                         )}
-                        <span>{mounted && isDark ? "Dark Mode" : "Light Mode"}</span>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

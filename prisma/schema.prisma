@@ -95,6 +95,8 @@ enum CredentialType {
   GEMINI
   GROQ
   ANTHROPIC
+  OPENROUTER
+  OPENCODE
 }
 
 model Workflow {
@@ -123,6 +125,8 @@ enum NodeType {
   GROQ
   DISCORD
   SLACK
+  OPENROUTER
+  OPENCODE
 }
 
 model Node {

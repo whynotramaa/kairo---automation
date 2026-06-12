@@ -10,9 +10,9 @@ export const ExecuteWorkflowBtn = ({ workflowId }: { workflowId: string }) => {
     }
 
     return (
-        <Button size="lg" onClick={handleExecute} disabled={executeWorkflow.isPending}>
-            <FlaskConicalIcon className="size-4" />
+        <Button size="lg" isLoading={executeWorkflow.isPending} onClick={handleExecute}>
+            {!executeWorkflow.isPending && <FlaskConicalIcon className="size-4" />}
             Execute Workflow
-        </Button >
+        </Button>
     )
 }

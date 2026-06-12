@@ -10,6 +10,8 @@ import { GroqExecutor } from "../components/groq/executor";
 import { AnthropicExecutor } from "../components/anthropic/executor";
 import { DiscordExecutor } from "../components/discord/executor";
 import { SlackExecutor } from "../components/slack/executor";
+import { OpenRouterExecutor } from "../components/openrouter/executor";
+import { OpenCodeExecutor } from "../components/opencode/executor";
 
 export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.MANUAL_TRIGGER]: manualTriggerExecutor,
@@ -23,6 +25,8 @@ export const executorRegistry: Record<NodeType, NodeExecutor> = {
     [NodeType.ANTHROPIC]: AnthropicExecutor,
     [NodeType.DISCORD]: DiscordExecutor,
     [NodeType.SLACK]: SlackExecutor,
+    [NodeType.OPENROUTER]: OpenRouterExecutor,
+    [NodeType.OPENCODE]: OpenCodeExecutor,
 }
 
 

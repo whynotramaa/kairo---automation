@@ -8,18 +8,18 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90",
-        outline: "border-border bg-background hover:bg-accent hover:text-accent-foreground shadow-sm",
+        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:shadow-md hover:-translate-y-px",
+        outline: "border-border bg-background hover:bg-accent hover:text-accent-foreground shadow-sm hover:-translate-y-px",
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         destructive: "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         link: "text-foreground underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-10 gap-2 px-4",
-        xs: "h-7 gap-1.5 px-3 text-xs rounded-lg",
-        sm: "h-9 gap-1.5 px-3 rounded-lg",
-        lg: "h-11 gap-2 px-6",
+        default: "h-10 gap-2 px-5",
+        xs: "h-7 gap-1.5 px-3.5 text-xs rounded-lg",
+        sm: "h-9 gap-1.5 px-4 rounded-lg",
+        lg: "h-11 gap-2 px-7",
         icon: "size-10",
         "icon-xs": "size-7 rounded-lg [&_svg:not([class*='size-'])]:size-3.5",
         "icon-sm": "size-9 rounded-lg",
@@ -33,18 +33,44 @@ const buttonVariants = cva(
   }
 )
 
+const DotLoader = () => (
+  <span className="dot-matrix-loader">
+    <span />
+    <span />
+    <span />
+    <span />
+  </span>
+)
+
+type ButtonProps = ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & {
+    isLoading?: boolean
+  }
+
 function Button({
   className,
   variant = "default",
   size = "default",
+  isLoading = false,
+  disabled,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
   return (
     <ButtonPrimitive
       data-slot="button"
+      disabled={disabled || isLoading}
       className={cn(buttonVariants({ variant, size, className }))}
       {...props}
-    />
+    >
+      {isLoading ? (
+        <span className="inline-flex items-center justify-center">
+          <DotLoader />
+        </span>
+      ) : (
+        children
+      )}
+    </ButtonPrimitive>
   )
 }
 

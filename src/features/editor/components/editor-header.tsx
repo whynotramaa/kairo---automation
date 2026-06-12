@@ -7,7 +7,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useWorkflow, useUpdateWorkflowName, useUpdateWorkflow } from "@/features/workflows/hooks/use-workflows"
 import { useAtomValue } from "jotai"
-import { SaveIcon } from "lucide-react"
+import { DownloadIcon, SaveIcon } from "lucide-react"
 import Link from "next/link"
 import React, { useEffect, useRef, useState } from "react"
 import { editorAtom } from "../store/atoms"
@@ -15,26 +15,38 @@ import { editorAtom } from "../store/atoms"
 export const EditorSaveButton = ({ workflowId }: { workflowId: string }) => {
 
     const editor = useAtomValue(editorAtom)
-
+    const { data: workflow } = useWorkflow(workflowId)
     const saveWorkflow = useUpdateWorkflow()
 
     const handleSave = () => {
-        if (!editor) {
-            return
-        }
-
+        if (!editor) return
         const nodes = editor.getNodes()
         const edges = editor.getEdges()
+        saveWorkflow.mutate({ id: workflowId, nodes, edges })
+    }
 
-        saveWorkflow.mutate({
-            id: workflowId, nodes, edges
-        })
+    const handleExport = () => {
+        if (!editor || !workflow) return
+        const nodes = editor.getNodes()
+        const edges = editor.getEdges()
+        const exportData = { name: workflow.name, nodes, edges }
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = `${workflow.name}.json`
+        a.click()
+        URL.revokeObjectURL(url)
     }
 
     return (
-        <div className="ml-auto">
-            <Button variant="outline" className="cursor-pointer px-4" size="lg" onClick={handleSave} disabled={saveWorkflow.isPending} >
-                <SaveIcon className="size-4" />
+        <div className="ml-auto flex items-center gap-2">
+            <Button variant="outline" className="cursor-pointer px-4" size="lg" onClick={handleExport} disabled={!workflow}>
+                <DownloadIcon className="size-4" />
+                Export
+            </Button>
+            <Button variant="outline" className="cursor-pointer px-4" size="lg" isLoading={saveWorkflow.isPending} onClick={handleSave}>
+                {!saveWorkflow.isPending && <SaveIcon className="size-4" />}
                 Save
             </Button>
         </div>

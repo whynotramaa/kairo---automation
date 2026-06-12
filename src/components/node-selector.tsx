@@ -83,6 +83,18 @@ const executionNodes: NodeTypeOption[] = [
         description: "Automate Slack messages through Kairo",
         icon: "/logos/slack.svg"
     },
+    {
+        type: NodeType.OPENROUTER,
+        label: "OpenRouter",
+        description: "Route to any AI model via OpenRouter",
+        icon: "/logos/openrouter.svg"
+    },
+    {
+        type: NodeType.OPENCODE,
+        label: "OpenCode (Zen)",
+        description: "Generate code and text using OpenCode Zen",
+        icon: "/logos/opencode.svg"
+    },
 ]
 
 

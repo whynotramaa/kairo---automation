@@ -47,6 +47,16 @@ const credentialTypeOptions = [
         label: "Claude",
         logo: "/logos/claude-ai-icon.svg"
     },
+    {
+        value: CredentialType.OPENROUTER,
+        label: "OpenRouter",
+        logo: "/logos/openrouter.svg"
+    },
+    {
+        value: CredentialType.OPENCODE,
+        label: "OpenCode (Zen)",
+        logo: "/logos/opencode.svg"
+    },
 ]
 
 interface CredentialFormProps {
@@ -193,14 +203,9 @@ export const CredentialsForm = ({ initialData }: CredentialFormProps) => {
                             <div className="flex gap-4">
                                 <Button
                                     type="submit"
-                                    disabled={
-                                        createCredential.isPending || updateCredential.isPending
-                                    }
+                                    isLoading={createCredential.isPending || updateCredential.isPending}
                                 >
-                                    {createCredential.isPending || updateCredential.isPending
-                                        ? "Saving..."
-                                        : isEdit ? "Update" : "Create"
-                                    }
+                                    {isEdit ? "Update" : "Create"}
                                 </Button>
 
                                 <Button variant="outline" type="button" asChild>

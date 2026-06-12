@@ -1,6 +1,7 @@
 import { generateSlug } from "random-word-slugs"
+import { createId } from "@paralleldrive/cuid2"
 import prisma from "@/lib/db"
-import { createTRPCRouter, protectedProcedure } from "@/trpc/init"
+import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init"
 import z, { string } from "zod"
 import { TRPCError } from "@trpc/server"
 import { FREE_TIER, PAGINATION } from "@/config/constants"
@@ -169,6 +170,77 @@ export const workflowsRouter = createTRPCRouter({
                 id: workflow.id, name: workflow.name, nodes, edges
             }
         }),
+    importFromJson: premiumProcedure
+        .input(
+            z.object({
+                name: z.string().min(1),
+                nodes: z.array(
+                    z.object({
+                        id: z.string(),
+                        type: z.string().nullish(),
+                        position: z.object({ x: z.number(), y: z.number() }),
+                        data: z.record(z.string(), z.any()).optional()
+                    }),
+                ),
+                edges: z.array(
+                    z.object({
+                        source: z.string(),
+                        target: z.string(),
+                        sourceHandle: z.string().nullish(),
+                        targetHandle: z.string().nullish(),
+                    }),
+                ),
+            })
+        )
+        .mutation(async ({ ctx, input }) => {
+            const { name, nodes, edges } = input
+
+            // remap original IDs to fresh ones so imported nodes never
+            // collide with existing rows in the database
+            const idMap = new Map<string, string>()
+            nodes.forEach((node) => {
+                idMap.set(node.id, createId())
+            })
+
+            return prisma.$transaction(async (tx) => {
+                const workflow = await tx.workflow.create({
+                    data: {
+                        name,
+                        userId: ctx.auth.user.id,
+                    }
+                })
+
+                if (nodes.length > 0) {
+                    await tx.node.createMany({
+                        data: nodes.map((node) => ({
+                            id: idMap.get(node.id)!,
+                            workflowId: workflow.id,
+                            name: node.type || "unknown",
+                            type: node.type as NodeType,
+                            position: node.position,
+                            data: node.data || {},
+                        })),
+                    })
+                }
+
+                if (edges.length > 0) {
+                    await tx.connection.createMany({
+                        data: edges
+                            .filter(edge => idMap.has(edge.source) && idMap.has(edge.target))
+                            .map(edge => ({
+                                workflowId: workflow.id,
+                                fromNodeId: idMap.get(edge.source)!,
+                                toNodeId: idMap.get(edge.target)!,
+                                fromOutput: edge.sourceHandle || "main",
+                                toInput: edge.targetHandle || "main",
+                            }))
+                    })
+                }
+
+                return workflow
+            })
+        }),
+
     getmany: protectedProcedure
         .input(z.object({
             page: z.number().default(PAGINATION.DEFAULT_PAGE),
